@@ -1,0 +1,46 @@
+\subsubsection{Canonical form of LP}
+\begin{align*}
+    &\max c^T \cdot x\\
+    &Ax \leq b\\
+    &x \geq 0
+\end{align*}
+\subsubsection{Dual of it}
+
+\begin{align*}
+    &\min y^T \cdot b\\
+    &y^TA \geq c^T \quad (A^ty \leq c)\\
+    &y \geq 0
+\end{align*}
+
+\subsubsection{Weak duality theorem}
+\begin{theorem}
+Primal LP optimum $\leq$ Dual LP optimum
+\end{theorem}
+\begin{proof}
+    For any feasible vector $x$ and for any feasible vector $y$, we show that $c^Tx
+    \leq y^Tb$. Because $x$ is feasible we have $Ax \leq b$. Because $y \geq 0$, we
+    get that 
+\begin{align}
+    \label{eq:wdt_1}
+    y^TAx \leq y^Tb.
+\end{align}
+   We also have that $y^TA \geq c^T$. Since $x \geq 0$:
+\begin{align}
+    \label{eq:wdt_2}
+    y^TAx \geq c^Tx.
+\end{align}
+By combining (\ref{eq:wdt_1}) and (\ref{eq:wdt_2}) we get that $c^Tx \leq y^Tb$. Because
+this holds for any feasible $x$ and $y$ we get that $\max c^Tx \leq \min y^Tb$.
+
+\end{proof}
+\subsubsection{Strong duality}
+\begin{theorem}
+    There are a few possibilities.
+    \begin{enumerate}
+        \item Both primal and dual problems are infeasible.
+        \item The primal problem is infeasible and the dual is unbounded.
+        \item The primal problem is unbounded and the dual is infeasible.
+        \item Both primal and dual problems have feasible solutions and their optimum
+            values are equal.
+    \end{enumerate}
+\end{theorem}

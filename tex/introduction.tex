@@ -1,0 +1,34 @@
+\section{Introduction}
+\subsection{The problem}
+\TODO{General bla bla about the parking problem}
+\subsection{More specific problem description}
+The parking robot can move either forwards, backwards or sideways. The length of
+the parking space is 6 meters, and it is 3 meters wide. The robots have smaller
+dimensions. Every action takes some time. Lifting a car takes 9 seconds,
+lowering it will take 3 seconds. The speed of the robot is 2 meters per second,
+when not carrying a car, and 1 meter per second, when loaded. Changing the
+direction takes 3 seconds. It needs time to accelerate and de-accelerate. 
+
+The last paragraph describes the information we received. However there is still
+some room to interpret the acceleration of the robot. It is said that changing
+direction takes 3 seconds. The interpretation we used, is that it takes 1.5
+seconds to stop a robot moving at it's maximum speed. And another 1.5 seconds to
+accelerate it to maximum speed in another direction. Maximum speed depends on
+whether the robot is carrying a car or not, however it makes sense that the
+acceleration of robot can be greater, when the mass is lower. Meaning that a
+heavy loaded robot can accelerate to speed 1 meter per second and that the empty
+robot can accelerate to speed 2 meters per second in the same time.
+
+\begin{table}
+    \begin{tabular}{| c | c |}
+        \hline
+        Action & time\\
+        \hline
+        Lift car & 9\\
+        Drop car & 3\\
+        \hline
+    \end{tabular}
+    \TODO{make this table nice}
+    \caption{The table describing the times some action will take}
+\end{table}
+\subsection{Simplified discrete problem}
