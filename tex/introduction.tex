@@ -18,28 +18,42 @@ whether the robot is carrying a car or not, however it makes sense that the
 acceleration of robot can be greater, when the mass is lower. Meaning that a
 heavy loaded robot can accelerate to speed 1 meter per second and that the empty
 robot can accelerate to speed 2 meters per second in the same time. It might
-help to see ~\autoref{fig:changedir}.
+help to see~\autoref{fig:changedir}.
 
 \begin{figure}[h]
-    \missingfigure{Two graphs explaining change direction. One for loaded, one
-    for empty robot. Y-axis - speed. X-axix - time}
+    \input{fig/changedir}
     \caption{This diagram serves as an illustration for the interpretation of
         time it takes to change direction. The direction of movement can change
         instantaneously, when speed is 0. Change of direction is not explicitly shown on
-        these graphs. }
+        this graph. }
     \label{fig:changedir}
 \end{figure}
 
 \begin{table}
     \begin{tabular}{| c | c |}
         \hline
-        Action & time\\
+        Action & Time (s)\\
         \hline
         Lift car & 9\\
         Drop car & 3\\
+        Accelerate to full speed & 1.5\\
+        Deacceleration from full speed to stop & 1.5\\
         \hline
     \end{tabular}
     \TODO{make this table nice}
     \caption{The table describing the times some action will take}
+    \label{tbl:times}
 \end{table}
 \subsection{Simplified discrete problem}
+From the~\autoref{tbl:times}, it can be seen that all the times are multiples
+of 1.5 seconds. We still need to verify that the time to move from parking
+place to another is indeed a multiple of 1.5 seconds.
+In~\autoref{fig:moving-times} all different possible robot movements are shown
+with the distance traveled calculated. From the figures it is quite easy to see
+that the distance traveled is equal to the dimensions of parking places.
+
+\begin{figure}[h]
+    \input{fig/moving-times}
+    \caption{This figure shows different possible movements. }
+    \label{fig:moving-times}
+\end{figure}

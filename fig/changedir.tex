@@ -1,0 +1,16 @@
+\begin{tikzpicture}[show background rectangle]
+\draw[thick,->] (0,0) -- (0,3) node[above] {Speed ($\frac{m}{s}$)};
+\draw[thick,->] (0,0) -- (5,0) node[below right] {Time ($s$)};
+\draw[very thin, gray] (0,0) grid (4.9,2.9);
+
+\foreach \x in {0,...,4}
+    \draw (\x,0.1) -- (\x,-0.1) node [below] {\x};
+
+\foreach \y in {1,...,2}
+    \draw (0.1,\y) -- (-0.1,\y) node [left] {\y};
+
+% path
+\draw[thick, green] (0,2) -- (1,2) -- (2.5,0) -- (4,2) -- (5,2) node[right] {Empty robot};
+\draw[thick, red] (0,1) -- (1,1) -- (2.5,0) -- (4,1) -- (5, 1) node[right] {Loaded robot};
+\end{tikzpicture}
+\TODO{Maybe improve this figure}
