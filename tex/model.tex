@@ -49,13 +49,14 @@ decisions or actions, that the model should find. The decision variables are
     &\forall v \in \V: \forall w \in \Wd: \forall t \in \T: &
     \drop_{v,w,d,t}
 \end{align}
-Decision variable is set to 1, iff that action is taken the specified node, with
-specified node status, and at specified timestep. For movement variables:
-$\go_{v,w,d,t}$, $\cont_{v,w,d,t}$ and $\stp_{v,w,d,t}$ also the direction is
-specified. Decision variables already have self-describing names, but to
-clarify, we explain them one-by-one in~\autoref{tbl:decvars}.
+Decision variable is set to 1, if and only if that action is taken at the
+specified node, with specified node status, and at specified timestep. For
+movement variables: $\go_{v,w,d,t}$, $\cont_{v,w,d,t}$ and $\stp_{v,w,d,t}$
+also the direction is specified. Decision variables already have
+self-describing names, but to clarify, we explain them one-by-one
+in~\autoref{tbl:decvars}.
 
-\begin{table}
+\begin{table}[h]
     \center
     \begin{tabular}{| c | p{\textwidth - 2.6cm} |}
         \hline
@@ -68,7 +69,7 @@ clarify, we explain them one-by-one in~\autoref{tbl:decvars}.
         $d$, does not slow down and continues moving in direction $d$.\\ \hline
         $\stp_{v,w,d,t}$ & At timestep $t$ on parking place $v$ with node status
         $w$ a robot that is about to reach the neighbouring node in direction
-        $d$, starts to de accelerate to stop in the neighbouring node.\\ \hline
+        $d$, starts to de-accelerate to stop in the neighbouring node.\\ \hline
         $\lift_{v,w,t}$ & At timestep $t$ on parking place $v$ with node status
         $w$ a robot starts to lift a car.\\ \hline
         $\drop_{v,w,t}$ & At timestep $t$ on parking place $v$ with node status
@@ -81,3 +82,58 @@ clarify, we explain them one-by-one in~\autoref{tbl:decvars}.
 \end{table}
 
 \subsection{Constraints}
+\subsubsection{Helper functions and notation for constraints}
+\label{sec:helpers}
+The first helper function used is $\edg : \V \times \D \to \V$. Let $\edg(v,d)$
+denote the node that is in the direction $d$ from node $v$.
+
+For directions we use $d + 1$ to denote the next direction from direction $d$ in
+clockwise manner. Logically $d - 1$ is used to mark the next direction from $d$
+in counterclockwise manner. For an example: $\Dn + 1 = \De$.
+\TODO{Add more meaningful stuff here}
+\subsubsection{Simple constraints}
+First constraint is to make sure that at every timestep each node has exactly
+one status variable set.
+\begin{align}
+    &\forall v \in \V: \forall t \in \T: & \sum_{w \in \W} \nstat_{v,w,t} = 1
+\end{align}
+When a directed edge is used, it's opposite cannot be used at the same time.
+\begin{align}
+    &\forall (u,v) \in \E: \forall t \in \T: & \occu_{(u,v),t} + \occu_{(v,u),t}
+    \leq 1
+\end{align}
+No more than one moving thing can arrive at the same node at the same time.
+\begin{align}
+    &\forall v \in \V: \forall t \in \T: & \sum_{u \in \N(v)} \occu_{(u,v),t} \leq 1
+\end{align}
+We also want to forbid movements in the orthogonal directions. \TODO{Maybe draw
+a figure showing the collision we avoid, using these constraints.} Note that there
+are vertices such that they do not have a edge between them, or they do
+not even have a neighbour in some directions. When that happens, the invalid
+$\occu_{e,t}$ variables are not added to the sum.
+\begin{equation}
+    \begin{split}
+        \forall v \in \V: \forall d \in \D: \forall t \in \T: \quad &
+        \occu_{(\edg(v,d),v),t} \\ + \occu_{(v,\edg(v,d-1)),t} + &
+        \occu_{(v,\edg(v,d+1)),t} \leq 1
+    \end{split}
+\end{equation}
+Also it does not make sense to allow more than 1 decision at the same time, at
+the same location.
+\begin{equation}
+    \begin{split}
+        \forall v \in \V: \forall t \in \T: \quad & \sum_{d \in \D, w \in
+        \Wm}(\go_{v,w,d,t} + \stp_{v,w,d,t} + \cont_{v,w,d,t}) \\
+        + & \sum_{w \in \Wl} \lift_{v,w,t} + \sum_{w \in \Wd} \drop_{v,w,t}
+        \leq 1
+    \end{split}
+\end{equation}
+
+\subsubsection{Lifting and dropping constraints}
+These constraints describe the lifting and dropping of cars. In fact they are
+quite similar, they indeed are opposite actions. We will start with lifting
+constraints. Lifting takes 6 timesteps. Here we divide $\T$ into two disjoint
+subsets $\T^+$ and $\T^-$, such that $\T^+ \cup \T^- = \T$.
+\subsubsection{Moving constraints}
+\subsubsection{Node status constraints}
+\subsubsection{Edge occupied constraints}
