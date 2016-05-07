@@ -90,8 +90,14 @@ denote the node that is in the direction $d$ from node $v$.
 For directions we use $d + 1$ to denote the next direction from direction $d$ in
 clockwise manner. Logically $d - 1$ is used to mark the next direction from $d$
 in counterclockwise manner. For an example: $\Dn + 1 = \De$.
+
+Some decisions take a specified amount of time. We want to disallow making such
+decisions, which lead to actions, that cannot be completed in the time frame of
+the model. For this purpose we want to split $\T$ into two disjoint subsets.
+Let $\T_i = \{ t | (t+i) \in \T\}$ and $\Tn_i = \T \setminus \T_i$.
 \TODO{Add more meaningful stuff here}
 \subsubsection{Simple constraints}
+\label{sec:simple}
 First constraint is to make sure that at every timestep each node has exactly
 one status variable set.
 \begin{align}
@@ -132,8 +138,61 @@ the same location.
 \subsubsection{Lifting and dropping constraints}
 These constraints describe the lifting and dropping of cars. In fact they are
 quite similar, they indeed are opposite actions. We will start with lifting
-constraints. Lifting takes 6 timesteps. Here we divide $\T$ into two disjoint
-subsets $\T^+$ and $\T^-$, such that $\T^+ \cup \T^- = \T$.
+constraints. Instead of using $\T$, like we did in~\autoref{sec:simple}, we use
+$\T_6$, because lifting takes 6 timesteps. First constraint type is to make sure,
+that the node status is correct, when a decision to lift is made.
+\begin{align}
+    &\forall v \in \V: \forall w \in \Wl: \forall t \in \T_6: &\lift_{v,w,t} -
+    \nstat_{v,w,t} \leq 0
+\end{align}
+While the lifting is in progress, we want the node status be fixed to
+$\stat{lft}$.
+\begin{align}
+    &\forall v \in \V: \forall w \in \Wl: \forall t \in \T_6: \forall i \in
+    \{1,\ldots,5\}: &\lift_{v,w,t} -
+    \nstat_{v,\stat{lft},t+i} \leq 0
+\end{align}
+And at the end of lifting the node status should correspond to the lifted
+thing. For that we have a simple helper function $f : \Wl \to \Wd$. It is
+defined as: $f(\stat{rc}) = \stat{cr}$ and $\forall j: f(\stat{rsc}_j) =
+\stat{scr}_j$. In words, the function $f$ determines the node status after
+lifting. By using $f$ we can now give the set of constraints.
+\begin{align}
+    &\forall v \in \V: \forall w \in \Wl: \forall t \in \T_6: &\lift_{v,w,t} -
+    \nstat_{v,f(w),t+6} \leq 0
+\end{align}
+If the lifting cannot be completed, we just make sure that the decision is
+never made.
+\begin{align}
+    &\forall v \in \V: \forall w \in \Wl: \forall t \in \Tn_6: &\lift_{v,w,t} =
+    0
+\end{align}
+
+For dropping we have almost the same constraints. First make sure that the node
+status is correct, when decision is made.
+\begin{align}
+    &\forall v \in \V: \forall w \in \Wd: \forall t \in \T_2: &\drop_{v,w,t} -
+    \nstat_{v,w,t} \leq 0
+\end{align}
+Dropping take less time than lifting, therefore the constraints for
+intermediate node state are simpler than for lifting.
+\begin{align}
+    &\forall v \in \V: \forall w \in \Wd: \forall t \in \T_2: &\drop_{v,w,t} -
+    \nstat_{v,\stat{drp},t+1} \leq 0
+\end{align}
+To get the correct node status at the end of the drop, we can use the inverse
+of the previous helper function $f$.
+\begin{align}
+    &\forall v \in \V: \forall w \in \Wd: \forall t \in \T_2: &\drop_{v,w,t} -
+    \nstat_{v,f^{-1}(w),t+2} \leq 0
+\end{align}
+As with lifting, if dropping action cannot be completed in the time frame of
+the model, disable the decision.
+\begin{align}
+    &\forall v \in \V: \forall w \in \Wd: \forall t \in \Tn_2: &\drop_{v,w,t} =
+    0
+\end{align}
+
 \subsubsection{Moving constraints}
 \subsubsection{Node status constraints}
 \subsubsection{Edge occupied constraints}
