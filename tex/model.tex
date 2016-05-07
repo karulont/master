@@ -1,3 +1,83 @@
-\section{Model description}
+\section{Integer programming model}
+\TODO{Write introduction to the model}
+Graph of vertices (nodes) of parking places and so forward.
+\TODO{sets and iterators}
+\TODO{Explanation of movement}
 \subsection{Variables}
+The variables for the model are all binary, meaning their allowed values are from the set
+$\{0,1\}$. There are three groups of variables:
+\begin{enumerate}
+    \item node status variables,
+    \item edge occupied variables,
+    \item decision variables.
+\end{enumerate}
+For every timestep, there is another layer of the variables. Meaning that if
+we have $n$ variables for timestep $0$, and we have $t$ timesteps, then in total
+there will be $tn$ variables in the model. In the variable indexing, the
+timestep is the always the last index.
+
+\subsubsection{Node status variables}
+As specified in \autoref{sec:discrete problem}, there are many possible statuses
+for parking spots. Node status variables are meant to encode the node status.
+There is a variable for every combination of node, status and timestep. To be
+more accurate, the group of node status variables is defined as
+\begin{align}
+    &\forall v \in \V: \forall w \in \W: \forall t \in \T: & \nstat_{v,w,t}
+\end{align}
+
+\subsubsection{Edge occupied variables}
+There are variables for each directed edge between parking spots. When a robot
+moves from vertex $u$ to vertex $v$ at timestep $t$, the edge variable
+$\occu_{(u,v),t}$ is 1 to indicate that the edge is occupied. All edge variables
+are defined as
+\begin{align}
+    &\forall e \in \E: \forall t \in \T: & \occu_{e,t}
+\end{align}
+
+\subsubsection{Decision variables}
+This is the most important group of variables, because they represent the
+decisions or actions, that the model should find. The decision variables are
+\begin{align}
+    &\forall v \in \V: \forall w \in \Wm: \forall d \in \D: \forall t \in \T: &
+    \go_{v,w,d,t}\\
+    &\forall v \in \V: \forall w \in \Wm: \forall d \in \D: \forall t \in \T: &
+    \cont_{v,w,d,t}\\
+    &\forall v \in \V: \forall w \in \Wm: \forall d \in \D: \forall t \in \T: &
+    \stp_{v,w,d,t}\\
+    &\forall v \in \V: \forall w \in \Wl: \forall t \in \T: &
+    \lift_{v,w,d,t}\\
+    &\forall v \in \V: \forall w \in \Wd: \forall t \in \T: &
+    \drop_{v,w,d,t}
+\end{align}
+Decision variable is set to 1, iff that action is taken the specified node, with
+specified node status, and at specified timestep. For movement variables:
+$\go_{v,w,d,t}$, $\cont_{v,w,d,t}$ and $\stp_{v,w,d,t}$ also the direction is
+specified. Decision variables already have self-describing names, but to
+clarify, we explain them one-by-one in~\autoref{tbl:decvars}.
+
+\begin{table}
+    \center
+    \begin{tabular}{| c | p{\textwidth - 2.6cm} |}
+        \hline
+        Variable & Meaning\\
+        \hline
+        $\go_{v,w,d,t}$ & At timestep $t$ on parking place $v$ with node status
+        $w$, a robot starts to accelerate in direction $d$.\\ \hline
+        $\cont_{v,w,d,t}$ & At timestep $t$ on parking place $v$ with node status
+        $w$ a robot that is about to reach the neighbouring node in direction
+        $d$, does not slow down and continues moving in direction $d$.\\ \hline
+        $\stp_{v,w,d,t}$ & At timestep $t$ on parking place $v$ with node status
+        $w$ a robot that is about to reach the neighbouring node in direction
+        $d$, starts to de accelerate to stop in the neighbouring node.\\ \hline
+        $\lift_{v,w,t}$ & At timestep $t$ on parking place $v$ with node status
+        $w$ a robot starts to lift a car.\\ \hline
+        $\drop_{v,w,t}$ & At timestep $t$ on parking place $v$ with node status
+        $w$ a robot starts to drop a car.\\
+        \hline
+    \end{tabular}
+    \TODO{make this table nice}
+    \caption{The table explaining the meaning of decision variables.}
+    \label{tbl:decvars}
+\end{table}
+
 \subsection{Constraints}
