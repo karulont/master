@@ -194,5 +194,52 @@ the model, disable the decision.
 \end{align}
 
 \subsubsection{Moving constraints}
+Depending on the direction and whether the robot is carrying a car, the
+movement takes different number of timesteps. We introduce a new function $g:
+\W \times \D \to \mathcal{N}$. Function $g(w,d)$ returns the number of timesteps
+the movement of $w$ takes in direction $d$. As with other decisions the first
+group of constraints make sure, that node status is correct at the time of the
+decision.
+\begin{align}
+    &\forall u \in \V: \forall w \in \Wm: \forall d \in \D: \forall t \in
+    \T_{g(w,d)}:
+    & \go_{u,w,d,t} - \nstat_{u,w,t} \leq 0
+\end{align}
+Next we make sure that $\go_{u,w,d,t}$ is disabled, when movement cannot be
+completed.
+\begin{align}
+    &\forall u \in \V: \forall w \in \Wm: \forall d \in \D: \forall t \in
+    \Tn_{g(w,d)}:
+    & \go_{u,w,d,t} = 0
+\end{align}
+When movement is started, it is implied that it should be ended or at continued
+at the same node. As a reminder, for the whole duration of before arriving at
+the next node, the node status remains the same as when movement started.
+\begin{equation}
+    \begin{split}
+        \forall u \in \V: &\forall w \in \Wm: \forall d \in \D: \forall t \in
+        \T_{g(w,d)}:\\
+        & \go_{u,w,d,t} - \stp_{u,w,d,t+g(w,d)-1} - \cont_{u,w,d,t+g(w,d)-1} +
+        \nstat_{u,w,t} \leq 1
+    \end{split}
+\end{equation}
+Next we make sure that edge occupied variable is 1 for the duration of
+movement.
+\begin{equation}
+    \begin{split}
+        \forall u \in \V: \forall w \in \Wm: \forall d \in \D: &\forall t \in
+        \T_{g(w,d)}: \forall i \in \{0,\ldots,g(w,d)\}:\\
+        & \go_{u,w,d,t} + \nstat_{u,w,t} -\occu_{(u,\edg(u,d),t+i} \leq 1
+    \end{split}
+\end{equation}
+Now we fix the node status for almost the duration of movement.
+\begin{equation}
+    \begin{split}
+        \forall u \in \V: \forall w \in \Wm: \forall d \in \D: &\forall t \in
+        \T_{g(w,d)}: \forall i \in \{1,\ldots,g(w,d)-1\}:\\
+        & \go_{u,w,d,t} + \nstat_{u,w,t} -\nstat_{(u,w,t+i} \leq 1
+    \end{split}
+\end{equation}
+
 \subsubsection{Node status constraints}
 \subsubsection{Edge occupied constraints}
