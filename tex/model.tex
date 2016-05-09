@@ -22,7 +22,8 @@ for parking spots. Node status variables are meant to encode the node status.
 There is a variable for every combination of node, status and timestep. To be
 more accurate, the group of node status variables is defined as
 \begin{align}
-    &\forall v \in \V: \forall w \in \W: \forall t \in \T: & \nstat_{v,w,t}
+    &\forall v \in \V \colon \forall w \in \W \colon \forall t \in \T \colon &
+    \nstat_{v,w,t}
 \end{align}
 
 \subsubsection{Edge occupied variables}
@@ -31,24 +32,25 @@ moves from vertex $u$ to vertex $v$ at timestep $t$, the edge variable
 $\occu_{(u,v),t}$ is 1 to indicate that the edge is occupied. All edge variables
 are defined as
 \begin{align}
-    &\forall e \in \E: \forall t \in \T: & \occu_{e,t}
+    &\forall e \in \E \colon \forall t \in \T \colon & \occu_{e,t}
 \end{align}
 
 \subsubsection{Decision variables}
 This is the most important group of variables, because they represent the
 decisions or actions, that the model should find. The decision variables are
 \begin{align}
-    &\forall v \in \V: \forall w \in \Wm: \forall d \in \D: \forall t \in \T: &
-    \go_{v,w,d,t}\\
-    &\forall v \in \V: \forall w \in \Wm: \forall d \in \D: \forall t \in \T: &
-    \cont_{v,w,d,t}\\
-    &\forall v \in \V: \forall w \in \Wm: \forall d \in \D: \forall t \in \T: &
-    \stp_{v,w,d,t}\\
-    &\forall v \in \V: \forall w \in \Wl: \forall t \in \T: &
+    &\forall v \in \V \colon \forall w \in \Wmc \colon \forall d \in \D \colon
+    \forall t \in \T \colon & \go_{v,w,d,t}\\
+    &\forall v \in \V \colon \forall w \in \Wmc \colon \forall d \in \D \colon
+    \forall t \in \T \colon & \cont_{v,w,d,t}\\
+    &\forall v \in \V \colon \forall w \in \Wmc \colon \forall d \in \D \colon
+    \forall t \in \T \colon & \stp_{v,w,d,t}\\
+    &\forall v \in \V \colon \forall w \in \Wl \colon \forall t \in \T \colon &
     \lift_{v,w,d,t}\\
-    &\forall v \in \V: \forall w \in \Wd: \forall t \in \T: &
+    &\forall v \in \V \colon \forall w \in \Wd \colon \forall t \in \T \colon &
     \drop_{v,w,d,t}
 \end{align}
+\TODO{Actually movement variables are there if edge $(v,\edg(v,d)) \in \E$.}
 Decision variable is set to 1, if and only if that action is taken at the
 specified node, with specified node status, and at specified timestep. For
 movement variables: $\go_{v,w,d,t}$, $\cont_{v,w,d,t}$ and $\stp_{v,w,d,t}$
@@ -84,8 +86,8 @@ in~\autoref{tbl:decvars}.
 \subsection{Constraints}
 \subsubsection{Helper functions and notation for constraints}
 \label{sec:helpers}
-The first helper function used is $\edg : \V \times \D \to \V$. Let $\edg(v,d)$
-denote the node that is in the direction $d$ from node $v$.
+The first helper function used is $\edg \colon \V \times \D \to \V$. Let
+$\edg(v,d)$ denote the node that is in the direction $d$ from node $v$.
 
 For directions we use $d + 1$ to denote the next direction from direction $d$ in
 clockwise manner. Logically $d - 1$ is used to mark the next direction from $d$
@@ -101,16 +103,18 @@ Let $\T_i = \{ t | (t+i) \in \T\}$ and $\Tn_i = \T \setminus \T_i$.
 First constraint is to make sure that at every timestep each node has exactly
 one status variable set.
 \begin{align}
-    &\forall v \in \V: \forall t \in \T: & \sum_{w \in \W} \nstat_{v,w,t} = 1
+    &\forall v \in \V \colon \forall t \in \T \colon & \sum_{w \in \W}
+    \nstat_{v,w,t} = 1
 \end{align}
 When a directed edge is used, it's opposite cannot be used at the same time.
 \begin{align}
-    &\forall (u,v) \in \E: \forall t \in \T: & \occu_{(u,v),t} + \occu_{(v,u),t}
-    \leq 1
+    &\forall (u,v) \in \E \colon \forall t \in \T \colon & \occu_{(u,v),t} +
+    \occu_{(v,u),t} \leq 1
 \end{align}
 No more than one moving thing can arrive at the same node at the same time.
 \begin{align}
-    &\forall v \in \V: \forall t \in \T: & \sum_{u \in \N(v)} \occu_{(u,v),t} \leq 1
+    &\forall v \in \V \colon \forall t \in \T \colon & \sum_{u \in \N(v)}
+    \occu_{(u,v),t} \leq 1
 \end{align}
 We also want to forbid movements in the orthogonal directions. \TODO{Maybe draw
 a figure showing the collision we avoid, using these constraints.} Note that there
@@ -119,8 +123,8 @@ not even have a neighbour in some directions. When that happens, the invalid
 $\occu_{e,t}$ variables are not added to the sum.
 \begin{equation}
     \begin{split}
-        \forall v \in \V: \forall d \in \D: \forall t \in \T: \quad &
-        \occu_{(\edg(v,d),v),t} \\ + \occu_{(v,\edg(v,d-1)),t} + &
+        \forall v \in \V \colon \forall d \in \D \colon \forall t \in \T \colon
+        \quad & \occu_{(\edg(v,d),v),t} \\ + \occu_{(v,\edg(v,d-1)),t} + &
         \occu_{(v,\edg(v,d+1)),t} \leq 1
     \end{split}
 \end{equation}
@@ -128,10 +132,9 @@ Also it does not make sense to allow more than 1 decision at the same time, at
 the same location.
 \begin{equation}
     \begin{split}
-        \forall v \in \V: \forall t \in \T: \quad & \sum_{d \in \D, w \in
-        \Wm}(\go_{v,w,d,t} + \stp_{v,w,d,t} + \cont_{v,w,d,t}) \\
-        + & \sum_{w \in \Wl} \lift_{v,w,t} + \sum_{w \in \Wd} \drop_{v,w,t}
-        \leq 1
+        \forall v \in \V \colon \forall t \in \T \colon \quad & \sum_{d \in \D,
+        w \in \Wmc}(\go_{v,w,d,t} + \stp_{v,w,d,t} + \cont_{v,w,d,t}) \\ + &
+        \sum_{w \in \Wl} \lift_{v,w,t} + \sum_{w \in \Wd} \drop_{v,w,t} \leq 1
     \end{split}
 \end{equation}
 
@@ -142,102 +145,147 @@ constraints. Instead of using $\T$, like we did in~\autoref{sec:simple}, we use
 $\T_6$, because lifting takes 6 timesteps. First constraint type is to make sure,
 that the node status is correct, when a decision to lift is made.
 \begin{align}
-    &\forall v \in \V: \forall w \in \Wl: \forall t \in \T_6: &\lift_{v,w,t} -
-    \nstat_{v,w,t} \leq 0
+    &\forall v \in \V \colon \forall w \in \Wl \colon \forall t \in \T_6 \colon
+    &\lift_{v,w,t} - \nstat_{v,w,t} \leq 0
 \end{align}
 While the lifting is in progress, we want the node status be fixed to
 $\stat{lft}$.
 \begin{align}
-    &\forall v \in \V: \forall w \in \Wl: \forall t \in \T_6: \forall i \in
-    \{1,\ldots,5\}: &\lift_{v,w,t} -
+    &\forall v \in \V \colon \forall w \in \Wl \colon \forall t \in \T_6 \colon
+    \forall i \in \{1,\ldots,5\} \colon &\lift_{v,w,t} -
     \nstat_{v,\stat{lft},t+i} \leq 0
 \end{align}
 And at the end of lifting the node status should correspond to the lifted
-thing. For that we have a simple helper function $f : \Wl \to \Wd$. It is
-defined as: $f(\stat{rc}) = \stat{cr}$ and $\forall j: f(\stat{rsc}_j) =
-\stat{scr}_j$. In words, the function $f$ determines the node status after
-lifting. By using $f$ we can now give the set of constraints.
+thing. For that we have a simple helper function $f \colon \Wl \to \Wd$. It is
+defined as: $f(\stat{rc}) = \stat{cr}$ and $\forall j \colon
+f(\stat{rsc}_j) = \stat{scr}_j$. In words, the function $f$ determines the node
+status after lifting. By using $f$ we can now give the set of constraints.
 \begin{align}
-    &\forall v \in \V: \forall w \in \Wl: \forall t \in \T_6: &\lift_{v,w,t} -
-    \nstat_{v,f(w),t+6} \leq 0
+    &\forall v \in \V \colon \forall w \in \Wl \colon \forall t \in \T_6 \colon
+    &\lift_{v,w,t} - \nstat_{v,f(w),t+6} \leq 0
 \end{align}
 If the lifting cannot be completed, we just make sure that the decision is
 never made.
 \begin{align}
-    &\forall v \in \V: \forall w \in \Wl: \forall t \in \Tn_6: &\lift_{v,w,t} =
-    0
+    &\forall v \in \V \colon \forall w \in \Wl \colon \forall t \in \Tn_6
+    \colon &\lift_{v,w,t} = 0
 \end{align}
 
 For dropping we have almost the same constraints. First make sure that the node
 status is correct, when decision is made.
 \begin{align}
-    &\forall v \in \V: \forall w \in \Wd: \forall t \in \T_2: &\drop_{v,w,t} -
-    \nstat_{v,w,t} \leq 0
+    &\forall v \in \V \colon \forall w \in \Wd \colon \forall t \in \T_2 \colon
+    &\drop_{v,w,t} - \nstat_{v,w,t} \leq 0
 \end{align}
 Dropping take less time than lifting, therefore the constraints for
 intermediate node state are simpler than for lifting.
 \begin{align}
-    &\forall v \in \V: \forall w \in \Wd: \forall t \in \T_2: &\drop_{v,w,t} -
-    \nstat_{v,\stat{drp},t+1} \leq 0
+    &\forall v \in \V \colon \forall w \in \Wd \colon \forall t \in \T_2 \colon
+    &\drop_{v,w,t} - \nstat_{v,\stat{drp},t+1} \leq 0
 \end{align}
 To get the correct node status at the end of the drop, we can use the inverse
 of the previous helper function $f$.
 \begin{align}
-    &\forall v \in \V: \forall w \in \Wd: \forall t \in \T_2: &\drop_{v,w,t} -
-    \nstat_{v,f^{-1}(w),t+2} \leq 0
+    &\forall v \in \V \colon \forall w \in \Wd \colon \forall t \in \T_2 \colon
+    &\drop_{v,w,t} - \nstat_{v,f^{-1}(w),t+2} \leq 0
 \end{align}
 As with lifting, if dropping action cannot be completed in the time frame of
 the model, disable the decision.
 \begin{align}
-    &\forall v \in \V: \forall w \in \Wd: \forall t \in \Tn_2: &\drop_{v,w,t} =
-    0
+    &\forall v \in \V \colon \forall w \in \Wd \colon \forall t \in \Tn_2
+    \colon &\drop_{v,w,t} = 0
 \end{align}
 
 \subsubsection{Moving constraints}
 Depending on the direction and whether the robot is carrying a car, the
-movement takes different number of timesteps. We introduce a new function $g:
-\W \times \D \to \mathcal{N}$. Function $g(w,d)$ returns the number of timesteps
-the movement of $w$ takes in direction $d$. As with other decisions the first
-group of constraints make sure, that node status is correct at the time of the
-decision.
+movement takes different number of timesteps. We introduce a new function $g
+\colon \W \times \D \to \mathcal{N}$. Function $g(w,d)$ returns the number of
+timesteps the movement of $w$ takes in direction $d$. 
+
+Now movement constraints are tricky. Because they are so tricky, We will use
+lots of variables to denote various things. In addition all of the remaining
+section is in the scope of $u \in \V \colon w \in \Wmc \colon d \in \D \colon
+\forall t \in \T \colon$
+
+Now let $\td = g(w,d)$, and $\td' = \td-1$. When movement starts at time $t$,
+the node status will change at time $t+\td$, and at time $t+\td'$ a decision
+has to be made to continue moving in the same direction or stop. Let $v =
+\edg(u,d)$ be the destination node and $e = (u,v)$ the edge that is used for
+movement. Later we also need $u' = \edg(u,d+2)$\footnote{$d+2$ means the
+opposite direction from $d$}, which is the node before $u$ and $v' =
+\edg(v,d)$, which is the node after $v$. Also we need the set of node statuses
+from where the moving component $w$ could came from. We define it as
+$\uw = \{w_m \mid w_m \in \Wm \wedge \getMC(w_m) = w\}$.
+
+When $e \notin \E$ we skip the constraints, because we do not have movement
+variables for such a combination of starting vertex $u$ and direction $d$.
+
+As with other decisions the first group of constraints make sure, that node
+status is correct at the time of the decision. In our case it has to be one of
+the possible node statuses in $\uw$.
 \begin{align}
-    &\forall u \in \V: \forall w \in \Wm: \forall d \in \D: \forall t \in
-    \T_{g(w,d)}:
-    & \go_{u,w,d,t} - \nstat_{u,w,t} \leq 0
+    & \go_{u,w,d,t} - \sum_{w_u \in \uw} \nstat_{u,w_u,t} \leq 0
 \end{align}
+If we have the edge $(u',u) \in \E$, that means that an already moving object
+could continue moving from $u'$ and is in other ways equivalent to a moving
+object, that start accelerating from $u$. So we define a variable
+\begin{align*}
+    \goOrCont = \begin{cases}
+        \go_{u,w,d,t} & (u',u) \notin \E\\
+        \go_{u,w,d,t} + \cont_{u',w,d,t} & (u',u) \in \E
+    \end{cases}
+\end{align*}
+and a constraint to make sure that those things do not happen at the same time.
+\begin{align}
+    \goOrCont \leq 1
+\end{align}
+When there is movement, it has to be continued or stopped.
+\begin{align}
+    \goOrCont - \stp_{u,w,d,t+\td'} - \cont_{u,w,d,t+\td'} = 0
+\end{align}
+For the duration of movement the edge $e$ must be occupied and the node status
+should remain same. However from $w$, we do not know the actual status,
+therefore we have to go through all possibilities.
+\begin{align}
+    &\forall i \in \{0,\ldots,\td'\}\colon & \goOrCont - \occu_{e,t+i} \leq 0\\
+    &\forall i \in \{1,\ldots,\td'\}\colon \forall w_u \in \uw\colon &
+    \goOrCont + \nstat_{u,w_u,t} - \nstat_{u,uw,t+i} \leq 1
+\end{align}
+
 Next we make sure that $\go_{u,w,d,t}$ is disabled, when movement cannot be
 completed.
 \begin{align}
-    &\forall u \in \V: \forall w \in \Wm: \forall d \in \D: \forall t \in
-    \Tn_{g(w,d)}:
-    & \go_{u,w,d,t} = 0
+    &\forall u \in \V \colon \forall w \in \Wm \colon \forall d \in \D \colon
+    \forall t \in \Tn_{g(w,d)} \colon & \go_{u,w,d,t} = 0
 \end{align}
 When movement is started, it is implied that it should be ended or at continued
 at the same node. As a reminder, for the whole duration of before arriving at
 the next node, the node status remains the same as when movement started.
 \begin{equation}
     \begin{split}
-        \forall u \in \V: &\forall w \in \Wm: \forall d \in \D: \forall t \in
-        \T_{g(w,d)}:\\
-        & \go_{u,w,d,t} - \stp_{u,w,d,t+g(w,d)-1} - \cont_{u,w,d,t+g(w,d)-1} +
-        \nstat_{u,w,t} \leq 1
+        \forall u \in \V \colon &\forall w \in \Wm \colon \forall d \in \D
+        \colon \forall t \in \T_{g(w,d)} \colon\\ & \go_{u,w,d,t} -
+        \stp_{u,w,d,t+g(w,d)-1} - \cont_{u,w,d,t+g(w,d)-1} + \nstat_{u,w,t}
+        \leq 1
     \end{split}
 \end{equation}
 Next we make sure that edge occupied variable is 1 for the duration of
 movement.
 \begin{equation}
     \begin{split}
-        \forall u \in \V: \forall w \in \Wm: \forall d \in \D: &\forall t \in
-        \T_{g(w,d)}: \forall i \in \{0,\ldots,g(w,d)\}:\\
-        & \go_{u,w,d,t} + \nstat_{u,w,t} -\occu_{(u,\edg(u,d),t+i} \leq 1
+        \forall u \in \V \colon \forall w \in \Wm \colon \forall d \in \D
+        \colon &\forall t \in \T_{g(w,d)} \colon \forall i \in
+        \{0,\ldots,g(w,d)\} \colon\\ & \go_{u,w,d,t} + \nstat_{u,w,t}
+        -\occu_{(u,\edg(u,d),t+i} \leq 1
     \end{split}
 \end{equation}
 Now we fix the node status for almost the duration of movement.
 \begin{equation}
     \begin{split}
-        \forall u \in \V: \forall w \in \Wm: \forall d \in \D: &\forall t \in
-        \T_{g(w,d)}: \forall i \in \{1,\ldots,g(w,d)-1\}:\\
-        & \go_{u,w,d,t} + \nstat_{u,w,t} -\nstat_{(u,w,t+i} \leq 1
+        \forall u \in \V \colon \forall w \in \Wm \colon \forall d \in \D
+        \colon &\forall t \in \T_{g(w,d)} \colon \forall i \in
+        \{1,\ldots,g(w,d)-1\} \colon\\ & \go_{u,w,d,t} + \nstat_{u,w,t}
+        -\nstat_{(u,w,t+i} \leq 1
     \end{split}
 \end{equation}
 
