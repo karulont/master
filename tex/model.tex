@@ -37,7 +37,7 @@ are defined as
 
 \subsubsection{Decision variables}
 This is the most important group of variables, because they represent the
-decisions or actions, that the model should find. The decision variables are
+decisions or actions that the model should find. The decision variables are
 \begin{align}
     &\forall v \in \V \colon \forall w \in \Wmc \colon \forall d \in \D \colon
     \forall t \in \T \colon & \go_{v,w,d,t}\\
@@ -94,7 +94,7 @@ clockwise manner. Logically $d - 1$ is used to mark the next direction from $d$
 in counterclockwise manner. For an example: $\Dn + 1 = \De$.
 
 Some decisions take a specified amount of time. We want to disallow making such
-decisions, which lead to actions, that cannot be completed in the time frame of
+decisions, which lead to actions that cannot be completed in the time frame of
 the model. For this purpose we want to split $\T$ into two disjoint subsets.
 Let $\T_i = \{ t | (t+i) \in \T\}$ and $\Tn_i = \T \setminus \T_i$.
 \TODO{Add more meaningful stuff here}
@@ -106,7 +106,7 @@ one status variable set.
     &\forall v \in \V \colon \forall t \in \T \colon & \sum_{w \in \W}
     \nstat_{v,w,t} = 1
 \end{align}
-When a directed edge is used, it's opposite cannot be used at the same time.
+When a directed edge is used, its opposite cannot be used at the same time.
 \begin{align}
     &\forall (u,v) \in \E \colon \forall t \in \T \colon & \occu_{(u,v),t} +
     \occu_{(v,u),t} \leq 1
@@ -116,11 +116,8 @@ No more than one moving thing can arrive at the same node at the same time.
     &\forall v \in \V \colon \forall t \in \T \colon & \sum_{u \in \N(v)}
     \occu_{(u,v),t} \leq 1
 \end{align}
-We also want to forbid movements in the orthogonal directions. \TODO{Maybe draw
-a figure showing the collision we avoid, using these constraints.} Note that there
-are vertices such that they do not have a edge between them, or they do
-not even have a neighbour in some directions. When that happens, the invalid
-$\occu_{e,t}$ variables are not added to the sum.
+\TODO{Maybe draw a figure showing the collision we avoid, using these constraints.}
+We also want to forbid movements in the orthogonal directions.
 \begin{equation}
     \begin{split}
         \forall v \in \V \colon \forall d \in \D \colon \forall t \in \T \colon
@@ -128,6 +125,9 @@ $\occu_{e,t}$ variables are not added to the sum.
         \occu_{(v,\edg(v,d+1)),t} \leq 1
     \end{split}
 \end{equation}
+Note that there are vertices such that they do not have a edge between them, or
+they do not even have a neighbour in some directions. When that happens, the
+invalid $\occu_{e,t}$ variables are not added to the sum.
 Also it does not make sense to allow more than 1 decision at the same time, at
 the same location.
 \begin{equation}
@@ -177,7 +177,7 @@ status is correct, when decision is made.
     &\forall v \in \V \colon \forall w \in \Wd \colon \forall t \in \T_2 \colon
     &\drop_{v,w,t} - \nstat_{v,w,t} \leq 0
 \end{align}
-Dropping take less time than lifting, therefore the constraints for
+Dropping takes less time than lifting, therefore the constraints for
 intermediate node state are simpler than for lifting.
 \begin{align}
     &\forall v \in \V \colon \forall w \in \Wd \colon \forall t \in \T_2 \colon
@@ -214,13 +214,15 @@ has to be made to continue moving in the same direction or stop. Let $v =
 movement. Later we also need $u' = \edg(u,d+2)$\footnote{$d+2$ means the
 opposite direction from $d$}, which is the node before $u$ and $v' =
 \edg(v,d)$, which is the node after $v$. Also we need the set of node statuses
-from where the moving component $w$ could came from. We define it as
-$\uw = \{w_m \mid w_m \in \Wm \wedge \getMC(w_m) = w\}$.
+from where the moving component $w$ could came from.
+\begin{align}
+    \uw = \{w_m \mid w_m \in \Wm \wedge \getMC(w_m) = w\}
+\end{align}
 
 When $e \notin \E$ we skip the constraints, because we do not have movement
 variables for such a combination of starting vertex $u$ and direction $d$.
 
-As with other decisions the first group of constraints make sure, that node
+As with other decisions the first group of constraints make sure that node
 status is correct at the time of the decision. In our case it has to be one of
 the possible node statuses in $\uw$.
 \begin{align}
@@ -231,8 +233,8 @@ could continue moving from $u'$ and is in other ways equivalent to a moving
 object, that start accelerating from $u$. So we define a variable
 \begin{align*}
     \goOrCont = \begin{cases}
-        \go_{u,w,d,t} & (u',u) \notin \E\\
-        \go_{u,w,d,t} + \cont_{u',w,d,t} & (u',u) \in \E
+        \go_{u,w,d,t} &\colon (u',u) \notin \E\\
+        \go_{u,w,d,t} + \cont_{u',w,d,t} &\colon (u',u) \in \E
     \end{cases}
 \end{align*}
 and a constraint to make sure that those things do not happen at the same time.
@@ -251,43 +253,60 @@ therefore we have to go through all possibilities.
     &\forall i \in \{1,\ldots,\td'\}\colon \forall w_u \in \uw\colon &
     \goOrCont + \nstat_{u,w_u,t} - \nstat_{u,uw,t+i} \leq 1
 \end{align}
-
-Next we make sure that $\go_{u,w,d,t}$ is disabled, when movement cannot be
-completed.
+There is a simple check: if edge $(v,v') \notin \E$, we can disable continue at
+$u$, because after reaching $v$ the robot cannot continue to $v'$. Also when
+$t$ is so small, that a previous continue or go decision could not be made, we
+disable both the stop and continue at time $t$.
 \begin{align}
-    &\forall u \in \V \colon \forall w \in \Wm \colon \forall d \in \D \colon
-    \forall t \in \Tn_{g(w,d)} \colon & \go_{u,w,d,t} = 0
+    &\IF{(v,v') \notin \E} &\cont_{u,w,d,t+\td'} = 0\\
+    &\IF{t < \td'} &\cont_{u,w,d,t} = 0\\
+    &\IF{t < \td'} &\stp_{u,w,d,t} = 0
 \end{align}
-When movement is started, it is implied that it should be ended or at continued
-at the same node. As a reminder, for the whole duration of before arriving at
-the next node, the node status remains the same as when movement started.
-\begin{equation}
-    \begin{split}
-        \forall u \in \V \colon &\forall w \in \Wm \colon \forall d \in \D
-        \colon \forall t \in \T_{g(w,d)} \colon\\ & \go_{u,w,d,t} -
-        \stp_{u,w,d,t+g(w,d)-1} - \cont_{u,w,d,t+g(w,d)-1} + \nstat_{u,w,t}
-        \leq 1
-    \end{split}
-\end{equation}
-Next we make sure that edge occupied variable is 1 for the duration of
-movement.
-\begin{equation}
-    \begin{split}
-        \forall u \in \V \colon \forall w \in \Wm \colon \forall d \in \D
-        \colon &\forall t \in \T_{g(w,d)} \colon \forall i \in
-        \{0,\ldots,g(w,d)\} \colon\\ & \go_{u,w,d,t} + \nstat_{u,w,t}
-        -\occu_{(u,\edg(u,d),t+i} \leq 1
-    \end{split}
-\end{equation}
-Now we fix the node status for almost the duration of movement.
-\begin{equation}
-    \begin{split}
-        \forall u \in \V \colon \forall w \in \Wm \colon \forall d \in \D
-        \colon &\forall t \in \T_{g(w,d)} \colon \forall i \in
-        \{1,\ldots,g(w,d)-1\} \colon\\ & \go_{u,w,d,t} + \nstat_{u,w,t}
-        -\nstat_{(u,w,t+i} \leq 1
-    \end{split}
-\end{equation}
+\TODO{Maybe a figure showing robots moving together.}
+Specifying node statuses for $u$ and $v$ after the movement would be simpler,
+if things could not move together. However robots can move side-by-side, at the
+same direction. For that reason we need to define additional set of node
+statuses. And corresponding variables. When the robot moves away from $u$,
+another thing can at the same time move into $u$. For that purpose, we define
+the set of statuses, that can move behind $w$ as $\B$. At the same time another
+moving object can disappear from $v$. Let $\A$ denote the set of things that
+can move ahead of $w$.
+\begin{align}
+    &\B = \begin{cases}
+        \Wmc &\colon w = \stat{r}\\
+        \Wd &\colon w \neq \stat{r}
+    \end{cases}
+    &\A = \begin{cases}
+        \{\stat{r}\} &\colon w = \stat{r}\\
+        \Wmc &\colon w \neq \stat{r}
+    \end{cases}
+\end{align}
+Now we construct the set of variables, which imply that some additional object
+is coming into $u$.
+\begin{align}
+    \um = \begin{cases}
+        0 &\colon (u',u) \notin \E\\
+        \sum_{w_{u'} \in \B} \cont_{u',w_{u'},d,t+\td'} +
+        \stp_{u',w_{u'},d,t+\td'} &\colon (u',u) \in \E
+    \end{cases}
+\end{align}
+Now we can give the general constraint, which says something about $u$ status
+at the end of movement. When $w$ moves away from $u$, it's status should be the
+beginning status minus the $w$, or something else must have come into $u$.
+\begin{align}
+    \stp_{u,w,d,t+\td'} + \cont_{u,w,d,t+\td'} - \ul -\um \leq 0
+\end{align}
+The last constraint was a general one, that did not exactly specify the status
+of $u$ after movement.
 
+Similarly to $\um$ we construct the set of variables, which imply that something is
+moving away from $v$.
+\begin{align}
+    \vl = \begin{cases}
+        0 &\colon (v,v') \notin \E\\
+        \sum_{w_v \in \A} \cont_{v,w_v,d,t+\td'} +
+        \stp_{v,w_v,d,t+\td'} &\colon (v,v') \in \E
+    \end{cases}
+\end{align}
 \subsubsection{Node status constraints}
 \subsubsection{Edge occupied constraints}
