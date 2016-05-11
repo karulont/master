@@ -273,12 +273,12 @@ not exist for $\cont$ and $\stp$ variables at the last timestep and no
 constraint would stop them form obtaining value 1.
 
 For the duration of movement the edge $e$ must be occupied and the node status
-should remain same. However from $w$, we do not know the actual status,
+should remain same. However from $w$, we do not know the actual status of $u$,
 therefore we have to go through all possibilities.
 \begin{align}
-    &\forall i \in \{0,\ldots,\td'\}\colon & \goOrCont - \occu_{e,t+i} \leq 0\\
-    &\forall i \in \{1,\ldots,\td'\}\colon \forall w_u \in \uw\colon &
-    \goOrCont + \nstat_{u,w_u,t} - \nstat_{u,uw,t+i} \leq 1
+    \forall i \in \{0,\ldots,\td'\}\colon \  \goOrCont - \occu_{e,t+i} &\leq 0\\
+    \forall i \in \{1,\ldots,\td'\}\colon \forall w_u \in \uw\colon \ \goOrCont
+    + \nstat_{u,w_u,t} - \nstat_{u,w_u,t+i} &\leq 1
 \end{align}
 There is a simple check: if edge $(v,v') \notin \E$, we can disable continue at
 $u$, because after reaching $v$ the robot cannot continue to $v'$. Also when
@@ -349,6 +349,16 @@ a car cannot come to $u$.
     \end{split}
 \end{align}
 
+Now we want to say something about $v$ status at the end of movement. For that
+we use construct the set of statuses that are possible for $v$ after $w$ has
+moved into it. It turns out that the set is exactly $\uw$. Movement implies
+that at the end $v$ has one of statuses in $\uw$.
+\begin{align}
+    \begin{split}
+        \cont_{u,w,d,t+\td'} + \stp_{u,w,d,t+\td'} -\sum_{w_v \in \uw}
+        \nstat_{v,w_v,t+\td} \leq 0
+    \end{split}
+\end{align}
 Similarly to $\um$ we construct the set of variables, which imply that something is
 moving away from $v$.
 \begin{align}
@@ -358,7 +368,20 @@ moving away from $v$.
         \stp_{v,w_v,d,t+\td'} &\colon (v,v') \in \E
     \end{cases}
 \end{align}
+Now we loop over all possible status that $v$ could have at the end of the
+movement and specify the actual status. If the end status of $v$ is $w_v$ then
+status of $v$ was $\remMC(w_v)$ or something moved away from $v$.
+\begin{align}
+    \begin{split}
+        \forall w_v \in \uw\colon \quad
+        \cont_{u,w,d,t+\td'} + \stp_{u,w,d,t+\td'}
+        &-\nstat_{v,\remMC(w_v),t+\td'}\\
+        &+\nstat_{v,w_v,t+\td} -\vl \leq 1
+    \end{split}
+\end{align}
 \subsubsection{Node status constraints}
+Purpose of node status constraints is to make sure that node statuses remain
+unchanged, when no movement occurs.
 \subsubsection{Edge occupied constraints}
 \subsection{Initial status and objective}
 \subsection{Size of the model}
