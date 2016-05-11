@@ -3,6 +3,15 @@
 Graph of vertices (nodes) of parking places and so forward.
 \TODO{sets and iterators}
 \TODO{Explanation of movement}
+\begin{lemma}
+    All feasible solutions to the integer model correspond to feasible
+    movements of robots and all feasible movements of the robots correspond to
+    feasible solutions to the$\ldots$
+    \TODO{find good way to write this}
+\end{lemma}
+\begin{proof}
+    This will become clear from the explanations $\ldots$
+\end{proof}
 \subsection{Variables}
 The variables for the model are all binary, meaning their allowed values are from the set
 $\{0,1\}$. There are three groups of variables:
@@ -125,7 +134,7 @@ We also want to forbid movements in the orthogonal directions.
         \occu_{(v,\edg(v,d+1)),t} \leq 1
     \end{split}
 \end{equation}
-Note that there are vertices such that they do not have a edge between them, or
+Note that there are vertices such that they do not have an edge between them, or
 they do not even have a neighbour in some directions. When that happens, the
 invalid $\occu_{e,t}$ variables are not added to the sum.
 Also it does not make sense to allow more than 1 decision at the same time, at
@@ -142,7 +151,7 @@ the same location.
 These constraints describe the lifting and dropping of cars. In fact they are
 quite similar, they indeed are opposite actions. We will start with lifting
 constraints. Instead of using $\T$, like we did in~\autoref{sec:simple}, we use
-$\T_6$, because lifting takes 6 timesteps. First constraint type is to make sure,
+$\T_6$, because lifting takes 6 timesteps. First constraint type is to make sure
 that the node status is correct, when a decision to lift is made.
 \begin{align}
     &\forall v \in \V \colon \forall w \in \Wl \colon \forall t \in \T_6 \colon
@@ -155,7 +164,7 @@ $\stat{lft}$.
     \forall i \in \{1,\ldots,5\} \colon &\lift_{v,w,t} -
     \nstat_{v,\stat{lft},t+i} \leq 0
 \end{align}
-And at the end of lifting the node status should correspond to the lifted
+And at the end of lifting, the node status should correspond to the lifted
 thing. For that we have a simple helper function $f \colon \Wl \to \Wd$. It is
 defined as: $f(\stat{rc}) = \stat{cr}$ and $\forall j \colon
 f(\stat{rsc}_j) = \stat{scr}_j$. In words, the function $f$ determines the node
@@ -202,10 +211,10 @@ movement takes different number of timesteps. We introduce a new function $g
 \colon \W \times \D \to \mathcal{N}$. Function $g(w,d)$ returns the number of
 timesteps the movement of $w$ takes in direction $d$. 
 
-Now movement constraints are tricky. Because they are so tricky, We will use
-lots of variables to denote various things. In addition all of the remaining
-section is in the scope of $u \in \V \colon w \in \Wmc \colon d \in \D \colon
-\forall t \in \T \colon$
+Now movement constraints are tricky and constructing them needs some
+abbreviations. The constraints in this section are for all combinations of $u
+\in \V$, $w \in \Wmc$, $d \in \D$ and $t \in \T$.
+\TODO{Fix this paragraph}
 
 Now let $\td = g(w,d)$, and $\td' = \td-1$. When movement starts at time $t$,
 the node status will change at time $t+\td$, and at time $t+\td'$ a decision
@@ -214,13 +223,18 @@ has to be made to continue moving in the same direction or stop. Let $v =
 movement. Later we also need $u' = \edg(u,d+2)$\footnote{$d+2$ means the
 opposite direction from $d$}, which is the node before $u$ and $v' =
 \edg(v,d)$, which is the node after $v$. Also we need the set of node statuses
-from where the moving component $w$ could came from.
+where the moving component $w$ could came from.
 \begin{align}
     \uw = \{w_m \mid w_m \in \Wm \wedge \getMC(w_m) = w\}
 \end{align}
-
 When $e \notin \E$ we skip the constraints, because we do not have movement
-variables for such a combination of starting vertex $u$ and direction $d$.
+variables for such a combination of starting vertex $u$ and direction $d$. Also
+when $t+\td' \notin \T$ we disable the start of movement, because it cannot
+continue.
+\begin{align}
+    &\IF{t+\td' \notin \T} &\go_{u,w,d,t} = 0
+\end{align}
+In addition to disabling go, we skip the rest of the constraints.
 
 As with other decisions the first group of constraints make sure that node
 status is correct at the time of the decision. In our case it has to be one of
@@ -230,7 +244,7 @@ the possible node statuses in $\uw$.
 \end{align}
 If we have the edge $(u',u) \in \E$, that means that an already moving object
 could continue moving from $u'$ and is in other ways equivalent to a moving
-object, that start accelerating from $u$. So we define a variable
+object, that start accelerating from $u$. So we define an abbreviation.
 \begin{align*}
     \goOrCont = \begin{cases}
         \go_{u,w,d,t} &\colon (u',u) \notin \E\\
@@ -243,8 +257,21 @@ and a constraint to make sure that those things do not happen at the same time.
 \end{align}
 When there is movement, it has to be continued or stopped.
 \begin{align}
+    \label{eq:goImpcont}
     \goOrCont - \stp_{u,w,d,t+\td'} - \cont_{u,w,d,t+\td'} = 0
 \end{align}
+Now again we have to check if movement can actually be completed. Earlier we
+checked if $t+\td' \notin \T$ and skipped the rest of the constraints. However
+now we check for $t+\td \not \T$. When that happens, we again disable the
+movement.
+\begin{align}
+    &\IF{t+\td' \notin \T} &\go_{u,w,d,t} = 0
+\end{align}
+And skip the rest of the constraints. At first this seems redundant, but we
+need to do it like this, because otherwise constraint~(\ref{eq:goImpcont}) would
+not exist for $\cont$ and $\stp$ variables at the last timestep and no
+constraint would stop them form obtaining value 1.
+
 For the duration of movement the edge $e$ must be occupied and the node status
 should remain same. However from $w$, we do not know the actual status,
 therefore we have to go through all possibilities.
@@ -297,7 +324,30 @@ beginning status minus the $w$, or something else must have come into $u$.
     \stp_{u,w,d,t+\td'} + \cont_{u,w,d,t+\td'} - \ul -\um \leq 0
 \end{align}
 The last constraint was a general one, that did not exactly specify the status
-of $u$ after movement.
+of $u$ after movement. To actually specify the status of $u$ after movement, we
+need to go over all possible $w_u \in \uw$. When $u$ status is about to change
+by continuing or stopping, and the $u$ status was $w_u$, the new status should
+be $\remMC(w_u)$\footnote{$w_u$ without the moveable component} or something
+else moved at the same time into $u$.
+\begin{align}
+    \begin{split}
+        \forall w_u \in \uw\colon\quad &\stp_{u,w,d,t+\td'} + \cont_{u,w,d,t+\td'}
+        - \um\\ &+ \nstat{u,w_u,t+\td'} -\nstat_{u,\remMC(w_u),t+\td'} \leq 1
+    \end{split}
+\end{align}
+When there is the edge $(u\,u) \in \E$ only then the following group of
+constraints is added. These make sure that if $w_b \in \B$ moved from $u'$ to $u$
+the new status of $u$ will be what would be left in $u$ plus the thing that
+moved in. There is one catch, what is left into $u$ is car and a robot carrying
+a car cannot come to $u$.
+\begin{align}
+    \begin{split}
+        \forall w_u \in \uw\colon &\forall w_b \in \B\colon \quad
+        \cont_{u',w_b,d,t+\td'} + \stp_{u',w_b,d,t+\td'}\\
+        &+\nstat_{u,w_u,t+\td'}
+        -\nstat_{u,\addMC(\remMC(w_u), w_b),t+\td} \leq 1
+    \end{split}
+\end{align}
 
 Similarly to $\um$ we construct the set of variables, which imply that something is
 moving away from $v$.
@@ -310,3 +360,5 @@ moving away from $v$.
 \end{align}
 \subsubsection{Node status constraints}
 \subsubsection{Edge occupied constraints}
+\subsection{Initial status and objective}
+\subsection{Size of the model}
