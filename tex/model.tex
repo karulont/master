@@ -268,7 +268,7 @@ movement.
     &\IF{t+\td' \notin \T} &\go_{u,w,d,t} = 0
 \end{align}
 And skip the rest of the constraints. At first this seems redundant, but we
-need to do it like this, because otherwise constraint~(\ref{eq:goImpcont}) would
+need to do it like this, because otherwise constraint~\eqref{eq:goImpcont} would
 not exist for $\cont$ and $\stp$ variables at the last timestep and no
 constraint would stop them form obtaining value 1.
 
@@ -424,7 +424,35 @@ correspond to node status changes.
         \emptyset &\colon \text{otherwise}
     \end{cases}
 \end{align}
+\TODO{rethink this and rewrite}
 \subsubsection{Edge occupied constraints}
+These constrains are to make sure, that when no movement is using an edge the
+edge occupied variable will be 0. Constraints in this section are applied for
+all combinations of $e=(u,v) \in \E$ and $t \in \T$.
+Let $d$ denote the direction of edge $e$. First we collect all variables
+which imply that edge is occupied.
+\begin{align}
+    \A = \sum_{w \in \Wmc,\td \in \{0,\ldots,\getMT(d,w)\}, t+\td \in T}
+    \stp_{u,w,d,t+\td} + \cont_{u,w,d,t+\td}
+\end{align}
+It is quite natural, that only of two of them can actually be 1. If we did not
+allow object to move together then only one of the variables could be 1. The
+reasoning is that at time $t$ an object moves away from $u$ but at the end of
+the movement ($t+\td-1$) another object which entered $u$ at time $t$ could
+also leave it.
+\todo{Bad explanation}
+\begin{align}
+    \A \leq 2
+\end{align}
+We would want an equality constraint $\occu_{e,t} - \A = 0$ which would tell
+us, that edge is occupied when something implied it, and movement occurs, when
+edge is occupied. However, $\A$ is not binary as $\occu_{e,t}$ and can also be
+2, therefore we need to simulate the equality constraint with two inequality
+constraints.
+\begin{align}
+    \occu_{e,t} - \A &\leq 0\\
+    2\occu_{e,t} - \A &\geq 0
+\end{align}
 \subsection{Initial status and objective}
 Initial status will be fixed by adding constraints. Let the initial
 status of node $v$ be $v_i$, then we can add constraints to fix node status
@@ -465,7 +493,7 @@ and then minimize energy used.
     \begin{split}
         \label{eq:energyobj}
         \min \sum_{v \in \V,w \in \Wmc,t \in \T,d \in \D, (v,\edg(v,d)) \in \E}
-        &C(1,w) \go_{v,w,d,t} + C_{2,w} \cont_{v,w,d,t} + C_{3,w} \stp_{v,w,d,t}\\
+        &C_{1,w} \go_{v,w,d,t} + C_{2,w} \cont_{v,w,d,t} + C_{3,w} \stp_{v,w,d,t}\\
         +\sum_{v \in \V, w \in \Wl,t \in \T} &D_{1,w} \lift_{v,w,t}
         +\sum_{v \in \V, w \in \Wd,t \in \T} D_{2,w} \drop_{v,w,t}
     \end{split}
@@ -474,7 +502,9 @@ and then minimize energy used.
 Here $C$ is $(3 \times |\Wmc|)$-dimensional matrix that contains the amount of
 energy used by the movement.
 This would give optimal solutions energy-wise,
-but we are more concerned about time. Therefore a combination of
-both~(\ref{eq:energyobj}) and (\ref{eq:timeobj}) would be the best.
+but we are more concerned about time. Minimizing the energy in the case when
+there are multiple robots, would lead to only one robot working at the same
+time, because working in parallel might take more energy. Therefore a combination of
+both~\eqref{eq:energyobj} and \eqref{eq:timeobj} would be the better.
 
 \subsection{Size of the model}
