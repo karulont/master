@@ -426,4 +426,55 @@ correspond to node status changes.
 \end{align}
 \subsubsection{Edge occupied constraints}
 \subsection{Initial status and objective}
+Initial status will be fixed by adding constraints. Let the initial
+status of node $v$ be $v_i$, then we can add constraints to fix node status
+variables at the first timestep.
+\begin{align}
+    &\forall v \in \V\colon &\nstat_{v,v_i,0} = 1
+\end{align}
+Let $v_e$ denote the end status of node $v$. There are different ways to make
+the model find a solution. One way is to add constraints for the last timestep.
+\begin{align}
+    &\forall v \in \V\colon &\nstat_{v,v_e,t_{\max}} = 1
+\end{align}
+We still have not defined the objective function to the model. We can
+define the objective function in a way that we do not need the constraints for
+the end status.
+\begin{align}
+    \min \sum_{v \in \V,t \in \T} -\nstat_{v,v_e,t}
+\end{align}
+This objective means that for every node $v$, we want the status be $v_e$ for
+as long as possible or in other words, as soon as possible.
+
+Other possible objective functions can be considered. Maybe it does not make
+sense to add all node statuses to objective. If we ignore the empty nodes, we
+can decrease the number of variables in the objective.
+\begin{align}
+    \label{eq:timeobj}
+    \min \sum_{v \in \V,t \in \T,v_e \neq \stat{e}} -\nstat_{v,v_e,t}
+\end{align}
+
+\TODO{think this over, maybe give on concrete objective here, and discuss about
+others somewhere else.}
+Sometimes the optimal solution consist of one robot waiting for other to move
+out of way. Instead of standing still, the waiting robot moves back and forth.
+This is undesired behaviour of the model, because it wastes energy. Therefore
+another possible objective function would be to use the end status constraints
+and then minimize energy used.
+\begin{align}
+    \begin{split}
+        \label{eq:energyobj}
+        \min \sum_{v \in \V,w \in \Wmc,t \in \T,d \in \D, (v,\edg(v,d)) \in \E}
+        &C(1,w) \go_{v,w,d,t} + C_{2,w} \cont_{v,w,d,t} + C_{3,w} \stp_{v,w,d,t}\\
+        +\sum_{v \in \V, w \in \Wl,t \in \T} &D_{1,w} \lift_{v,w,t}
+        +\sum_{v \in \V, w \in \Wd,t \in \T} D_{2,w} \drop_{v,w,t}
+    \end{split}
+\end{align}
+\TODO{do we want something like that?}
+Here $C$ is $(3 \times |\Wmc|)$-dimensional matrix that contains the amount of
+energy used by the movement.
+This would give optimal solutions energy-wise,
+but we are more concerned about time. Therefore a combination of
+both~(\ref{eq:energyobj}) and (\ref{eq:timeobj}) would be the best.
+
 \subsection{Size of the model}
