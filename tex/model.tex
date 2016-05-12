@@ -55,9 +55,9 @@ decisions or actions that the model should find. The decision variables are
     &\forall v \in \V \colon \forall w \in \Wmc \colon \forall d \in \D \colon
     \forall t \in \T \colon & \stp_{v,w,d,t}\\
     &\forall v \in \V \colon \forall w \in \Wl \colon \forall t \in \T \colon &
-    \lift_{v,w,d,t}\\
+    \lift_{v,w,t}\\
     &\forall v \in \V \colon \forall w \in \Wd \colon \forall t \in \T \colon &
-    \drop_{v,w,d,t}
+    \drop_{v,w,t}
 \end{align}
 \TODO{Actually movement variables are there if edge $(v,\edg(v,d)) \in \E$.}
 Decision variable is set to 1, if and only if that action is taken at the
@@ -381,7 +381,49 @@ status of $v$ was $\remMC(w_v)$ or something moved away from $v$.
 \end{align}
 \subsubsection{Node status constraints}
 Purpose of node status constraints is to make sure that node statuses remain
-unchanged, when no movement occurs.
+unchanged when no movement occurs. As with moving constraints, we declare that
+the remainder of the section is applied to all possible combinations of $u \in
+\V$, $w \in \W$ and $t \in \T_1$.
+
+The basic idea is to list all variables that could change the status of $u$
+between timesteps $t$ and $t+1$. First are the lift and drop variables for the
+current timestep $t$.
+\begin{align}
+    &\A_{\mathrm{lift}} = \begin{cases}
+        \{\lift_{u,w,t}\} &\colon w \in \Wl\\
+        \emptyset &\colon w \notin \Wl
+    \end{cases}
+    &\A_{\mathrm{drop}} = \begin{cases}
+        \{\drop_{u,w,t}\} &\colon w \in \Wd\\
+        \emptyset &\colon w \notin \Wd
+    \end{cases}
+\end{align}
+Next are the lift and drop variables that happened in the past.
+\begin{align}
+    \B_{\mathrm{lift}} &= \begin{cases}
+        \{\lift_{u,w_l,t-5} \mid w_l \in \Wl\} &\colon w = \stat{lft} \wedge
+        t \in \T_{-5}\\
+        \emptyset &\colon \text{otherwise}
+    \end{cases}\\
+    \B_{\mathrm{drop}} &= \begin{cases}
+        \{\drop_{u,w_d,t-1} \mid w_d \in \Wd\} &\colon w = \stat{drp} \wedge
+        t \in \T_{-1}\\
+        \emptyset &\colon \text{otherwise}
+    \end{cases}
+\end{align}
+Now there are the movement variables. Only continue and stop variables actually
+correspond to node status changes.
+\begin{align}
+    \B_{\mathrm{move}} &= \begin{cases}
+        \{\cont_{u,w_m,d+2,t} \mid w_m \in \Wm \wedge \getMC(w_m) = w\} &\colon (\edg(u,d),u) \in \E\\
+        \emptyset &\colon \text{otherwise}
+    \end{cases}\\
+    \A_{\mathrm{move}} &= \begin{cases}
+        \{\drop_{u,w_d,t-1} \mid w_d \in \Wd\} &\colon w = \stat{drp} \wedge
+        t-1 \in \T\\
+        \emptyset &\colon \text{otherwise}
+    \end{cases}
+\end{align}
 \subsubsection{Edge occupied constraints}
 \subsection{Initial status and objective}
 \subsection{Size of the model}
