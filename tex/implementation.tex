@@ -5,7 +5,7 @@ For implementing the model, there were at least two major decisions to be made.
     \item What programming language to use for generating the model?
 \end{itemize}
 The author was familiar with a commercial grade optimization solver called
-Gurobi\cite{gurobi}. It is advertised as a state-of-the-art mathematical
+Gurobi~\cite{gurobi}. It is advertised as a state-of-the-art mathematical
 programming solver and it has a free, full-featured academic license.
 Therefore, other integer programming model solvers were not even considered.
 \TODO{Maybe should write a bit more about why Gurobi is the best choice?}
@@ -15,7 +15,7 @@ Python. It is well known that Python as a interpreted language has a constant
 runtime overhead. However, C++ has lots of unwanted complexity. The author
 chose to use Python, because generating the integer programming model would
 only take a fraction of the time to actually solve it. And the model solving
-is not hindered by the runtime system of Python. Because a there exist lots of
+is not hindered by the runtime system of Python. Because there exist lots of
 code that still uses version 2.X of Python, it should be explicitly
 mentioned that Python 3.X was used in thesis. To be precise, the exact version
 was Python 3.5.1.
@@ -23,8 +23,48 @@ was Python 3.5.1.
 Programmers are used to thinking in terms of if clauses. However, in an integer
 programming model there are no ifs. At first it was hard to come up with
 constraints. You knew which variables are involved and what values are legal,
-but writing them as a constraint was still hard.
+but writing them as a constraint was still unintuitive. Finding the right
+constraint when there were five or more variables proved hard to do by
+hand. Fortunately there is a tool called Panda~\cite{panda} to help with
+finding constraints.
+Panda takes an input file, which list the variables and legal values of the
+variables. Then it processes this list of legal values and outputs equalities and inequalities
+that hold between the variables.
+\TODO{example input and output}
+Writing input files for Panda is a little boring, because you have to list all
+the legal assignments of values to variables. We wrote little programs with
+regular if clauses to generate input files for Panda. Panda outputs lots of
+inequalities, but some of them are trivial and already covered by other
+constraints in the model. Therefore, human judgement was still needed to see
+which inequalities and equalities added something to the integer programming
+model.
 \subsection{Graphical visualization}
+For testing the model and seeing the solutions found, we needed some kind of
+feedback. At first we had a textual output of the node status and decision
+variables for each timestep.
+\TODO{add textual output}
+However, when the time came to find out, if edge occupied variables had
+reasonable values in the solution, the textual output was not good enough to
+display the directed edges well. Instead of improving the textual output, we
+chose to implement the visualization of solutions graphically.
+
+Because the visualization was used mostly for debugging purposes, there was not
+a lot of effort and time put into writing it. To minimize the effort we wrote
+the graphical visualization using the de-facto standard Python graphical user
+interface package TkInter~\cite{tkinter}. The graphical visualization shows the
+underlying graph of the problem one timestep at a time. There are keybindings
+to increase and decrease the visible timestep. For a given timestep, the
+occupied edges are highlighted. At each vertex, the node status is displayed
+and if one of the decision variables was set 1, the decision is also displayed
+inside the vertex.
+\TODO{add example screenshots}
 \subsection{Tests written to aid development}
+Complexity of the interger programming model is large enough to not fit into
+the working memory of humans. Humans can keep about 7 things in their working
+memory at once~\cite{magic7}. When developing the model a lot of time was
+consumed by manually altering the initial status of the model and then checking
+if everything went as expected. To cut down the time on manual rewriting of the
+initial status and manual checking of solutions, several test scenarios were
+created.
 \subsection{Irreducible inconsistent subsystem}
 \subsection{Tuning Gurobi parameters}
