@@ -4,6 +4,7 @@
 \usepackage[a4paper]{geometry}
 \usepackage{array}
 \usepackage{hyperref}
+\usepackage[nottoc,notlot,notlof]{tocbibind}
 
 \usepackage{amsmath}
 \usepackage{amsthm}
@@ -68,11 +69,15 @@
 \include{tex/abstract}
 \listoftodos
 \tableofcontents
+\listoffigures
+\listoftables
 \include{tex/introduction}
 %\include{tex/linear}
 \include{tex/model}
 \include{tex/implementation}
 \include{tex/comparison}
+\bibliographystyle{plain}
+\bibliography{masters}
 \appendix
 \include{tex/license}
 \end{document}

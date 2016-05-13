@@ -1,6 +1,30 @@
 \section{Implementation}
+For implementing the model, there were at least two major decisions to be made.
+\begin{itemize}
+    \item Which optimization software to use?
+    \item What programming language to use for generating the model?
+\end{itemize}
+The author was familiar with a commercial grade optimization solver called
+Gurobi\cite{gurobi}. It is advertised as a state-of-the-art mathematical
+programming solver and it has a free, full-featured academic license.
+Therefore, other integer programming model solvers were not even considered.
+\TODO{Maybe should write a bit more about why Gurobi is the best choice?}
+
+Gurobi has bindings for several languages. The ones considered were C++ and
+Python. It is well known that Python as a interpreted language has a constant
+runtime overhead. However, C++ has lots of unwanted complexity. The author
+chose to use Python, because generating the integer programming model would
+only take a fraction of the time to actually solve it. And the model solving
+is not hindered by the runtime system of Python. Because a there exist lots of
+code that still uses version 2.X of Python, it should be explicitly
+mentioned that Python 3.X was used in thesis. To be precise, the exact version
+was Python 3.5.1.
 \subsection{Panda}
-\subsection{Tests written to aid development}
-\subsubsection{IIS}
+Programmers are used to thinking in terms of if clauses. However, in an integer
+programming model there are no ifs. At first it was hard to come up with
+constraints. You knew which variables are involved and what values are legal,
+but writing them as a constraint was still hard.
 \subsection{Graphical visualization}
+\subsection{Tests written to aid development}
+\subsection{Irreducible inconsistent subsystem}
 \subsection{Tuning Gurobi parameters}
