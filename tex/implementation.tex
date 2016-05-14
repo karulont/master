@@ -55,16 +55,26 @@ interface package TkInter~\cite{tkinter}. The graphical visualization shows the
 underlying graph of the problem one timestep at a time. There are keybindings
 to increase and decrease the visible timestep. For a given timestep, the
 occupied edges are highlighted. At each vertex, the node status is displayed
-and if one of the decision variables was set 1, the decision is also displayed
+and if one of the decision variables was set to 1, the decision is also displayed
 inside the vertex.
 \TODO{add example screenshots}
+\subsection{Irreducible inconsistent subsystem}
+In the development phase errors were made. Sometimes a feasible movement were
+not feasible in the integer programming model. This would mean that all the
+constraints would need to be carefully verified again. Luckily, Gurobi can
+calculate the irreducible inconsistent subsystem of an infeasible model.
+Inconsistent subsystem of a integer program is a subset of constraints, that
+are inconsistent. Irreducible inconsistent subsystem is the minimal
+inconsistent subsystem. Basically we can ask Gurobi to find out which set of
+constraints make the model infeasible. After we get such a set, we only have
+recheck the constraints that are in the irreducible inconsistent subsystem.
+\TODO{A simple infeasible LP, with corresponding IIS as an example}
 \subsection{Tests written to aid development}
 Complexity of the interger programming model is large enough to not fit into
 the working memory of humans. Humans can keep about 7 things in their working
 memory at once~\cite{magic7}. When developing the model a lot of time was
 consumed by manually altering the initial status of the model and then checking
-if everything went as expected. To cut down the time on manual rewriting of the
-initial status and manual checking of solutions, several test scenarios were
-created.
-\subsection{Irreducible inconsistent subsystem}
+if the feasible optimal solution to model was indeed a valid sequence of
+actions. To cut down the time on manual rewriting of the initial status and
+manual checking of solutions, several test scenarios were created.
 \subsection{Tuning Gurobi parameters}
