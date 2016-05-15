@@ -12,6 +12,7 @@
 \usepackage{todonotes}
 \usepackage{tikz}
 \usetikzlibrary{backgrounds}
+\usepackage{graphicx}
 
 \newcommand{\TODO}{\todo[inline]}
 \newcommand{\nstat}{\mathrm{nstat}}
@@ -61,6 +62,15 @@
 
 \newcommand{\stat}[1]{\text{\bf #1}}
 
+\newcommand{\testImage}[2]{
+    \begin{figure}[h]
+        \begin{center}
+            \includegraphics[scale=0.7]{fig/#1.png}
+            \caption{#2}
+        \end{center}
+    \end{figure}
+}
+\newcommand{\ife}{\overset{?}{=}}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}

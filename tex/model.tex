@@ -121,6 +121,7 @@ one status variable set.
 \end{align}
 When a directed edge is used, its opposite cannot be used at the same time.
 \begin{align}
+    \label{eq:antiedges}
     &\forall (u,v) \in \E \colon \forall t \in \T \colon & \occu_{(u,v),t} +
     \occu_{(v,u),t} \leq 1
 \end{align}
@@ -129,7 +130,13 @@ No more than one moving thing can arrive at the same node at the same time.
     &\forall v \in \V \colon \forall t \in \T \colon & \sum_{u \in \N(v)}
     \occu_{(u,v),t} \leq 1
 \end{align}
-\TODO{Maybe draw a figure showing the collision we avoid, using these constraints.}
+\TODO{Maybe }
+\begin{figure}[h]
+    \missingfigure{draw a figure showing the collision we avoid, using these
+    constraints}
+    \caption{This kind of movement will cause collision.}
+    \label{fig:orthcol}
+\end{figure}
 We also want to forbid movements in the orthogonal directions.
 \begin{equation}
     \begin{split}
