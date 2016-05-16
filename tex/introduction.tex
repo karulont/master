@@ -1,13 +1,59 @@
 \section{Introduction}
+It does not take a scientific paper to see that the number of cars on our
+streets has increased. This creates a need for more parking places. It is
+common for shopping centers and other public places with lots of quests to have
+large parking lots or even parking houses. However, finding a parking space
+still is a frustrating experience for the drivers. Some fancy places have valet
+parking. Valet parking is rare in Estonia, but it is quite common in North
+America. Valet parking means that the driver does not have to self-park and a
+valet will park their car.
+
+Since the industrial revolution when a lot of manufacturing by hand was replaced
+by automation, other manual tasks are handed over to machines. One of those
+tasks is valet parking. Instead of a human valet, there is a parking robot that
+carries your car to a free parking space. In the system explored in this
+thesis, drivers will stop their cars on a special platform. A parking robot can
+freely move under those platforms and also can lift the platform up from the
+ground and carry it to another place with the drivers car still on the
+platform. For a driver the experience should be very similar to regular valet
+parking: driver stops near the door and does not need to worry about parking,
+after visiting the venue the driver can notify the system and will have their
+car brought back to them.
+\TODO{Write about a more concrete system.}
 \subsection{The problem}
-\TODO{General bla bla about the parking problem}
+\TODO{Some pictures of actual robots?}
+In an automated valet parking system, the software has to choose which of
+possibly many parking robots will service the incoming parking or car retrieval
+request, it will also need to figure out a path for the robots. Regular car
+parks have passageways, so that no car is parked in a way that would block
+other cars from entering or exiting. In an automated system we do not need
+passageways, because blocking cars can be lifted and moved out of the way.
+It is important that the time taken to retrieve cars is minimized, otherwise
+drivers feel like they are wasting their time, waiting for their car. In a car
+park without passageways, the parking robots have to be cooperative and cannot
+do path planning as independent agents like in~\cite{wurman2008coordinating}.
+
+There are a lot of optimization problems in a automated parking system
+described. We chose to tackle a sub-problem: given a initial configuration of
+robots and cars in the system and a terminal configuration, find the best
+sequence of actions for robots to transform the initial configuration into the
+terminal configuration. Note that best in this case means mostly shortest time,
+but we might also want to avoid unneeded actions because they waste energy and
+moving parts wear.
+
+\TODO{write about other approaches}
+
+We chose to specify the problem as an integer programming model optimization
+problem. Unlike approximation algorithms, integer programming will give us a
+strong guarantee that the solution found is in fact optimal.
+
 \subsection{More specific problem description}
 The parking robot can move either forwards, backwards or sideways. The length of
 the parking space is 6 meters, and it is 3 meters wide. The robots have smaller
 dimensions. Every action takes some time. Lifting a car takes 9 seconds,
 lowering it will take 3 seconds. The speed of the robot is 2 meters per second,
-when not carrying a car, and 1 meter per second, when loaded. Changing the
-direction takes 3 seconds. It needs time to accelerate and de-accelerate. 
+when not carrying a car, and 1 meter per second, when loaded. Robots needs time
+to accelerate and de-accelerate. Changing the direction takes 3 seconds.
 
 The last paragraph describes the information we received. However there is still
 some room to interpret the acceleration of the robot. It is said that changing
@@ -21,30 +67,58 @@ robot can accelerate to speed 2 meters per second in the same time. It might
 help to see~\autoref{fig:changedir}.
 
 \begin{figure}[h]
-    \input{fig/changedir}
-    \caption{This diagram serves as an illustration for the interpretation of
-        time it takes to change direction. The direction of movement can change
-        instantaneously, when speed is 0. Change of direction is not explicitly shown on
-        this graph. }
-    \label{fig:changedir}
+    \begin{center}
+        \input{fig/changedir}
+        \caption{This diagram serves as an illustration for the interpretation of
+            time it takes to change direction. The direction of movement can change
+            instantaneously, when speed is 0. Change of direction is not explicitly shown on
+            this graph.}
+        \label{fig:changedir}
+    \end{center}
+\end{figure}
+
+It is assumed that car park is a grid of of parking spaces. We define a set of
+directions as $\D = \{\Dn, \De, \Ds, \Dw\}$. A parking place in the $\Dn$ -
+$\Ds$ dimension is 6 meters long, and in the $\De$ - $\Dw$ dimension is 3
+meters wide. Note that the directions defined here do not have to correspond to
+geographical directions.
+
+After those definitions we can say that an empty robot can go to adjacent space
+in the $\Dn$ or $\Ds$ direction in 4.5 seconds. Empty robot can go to adjacent
+space in the shorter dimension in 3 seconds. A loaded robot needs 7.5 seconds
+to reach adjacent parking space in the longer dimension and 4.5 seconds for
+shorter dimension. Speed versus time graph of all of those movements is
+on~\autoref{fig:moving times}, the area under those lines is equal to the
+dimensions of the parking space.
+
+\begin{figure}[h]
+    \begin{center}
+        \input{fig/moving-times}
+        \caption{This figure shows all the possible movements to an adjacent
+        parking space.}
+        \label{fig:moving times}
+    \end{center}
 \end{figure}
 
 \begin{table}
-    \begin{tabular}{| c | c |}
-        \hline
-        Action & Time (s)\\
-        \hline
-        Lift car & 9\\
-        Drop car & 3\\
-        Accelerate to full speed & 1.5\\
-        Deacceleration from full speed to stop & 1.5\\
-        \hline
-    \end{tabular}
-    \TODO{make this table nice}
-    \caption{The table describing the times some action will take}
-    \label{tbl:times}
+    \begin{center}
+        \begin{tabular}{| c | c |}
+            \hline
+            Action & Time (s)\\
+            \hline
+            Lift car & 9\\
+            Drop car & 3\\
+            Accelerate to full speed & 1.5\\
+            Deacceleration from full speed to stop & 1.5\\
+            \hline
+        \end{tabular}
+        \TODO{make this table nice}
+        \caption{The table describing the times some action will take}
+        \label{tbl:times}
+    \end{center}
 \end{table}
 \subsection{Simplified discrete problem}
+\label{sec:discrete problem}
 From the~\autoref{tbl:times}, it can be seen that all the times are multiples
 of 1.5 seconds. We still need to verify that the time to move from parking
 place to another is indeed a multiple of 1.5 seconds.
@@ -52,10 +126,17 @@ In~\autoref{fig:moving-times} all different possible robot movements are shown
 with the distance traveled calculated. From the figures it is quite easy to see
 that the distance traveled is equal to the dimensions of parking places.
 
-\begin{figure}[h]
-    \input{fig/moving-times}
-    \caption{This figure shows different possible movements. }
-    \label{fig:moving-times}
-\end{figure}
-\label{sec:discrete problem}
 \TODO{Infeasible initial and terminal status, with example}
+Sometimes a given initial status with given terminal status is unsolvable no
+matter how many timesteps are considered. For an example
+see~\autoref{fig:unsolvable}.
+
+\begin{figure}[h]
+    \begin{center}
+        \missingfigure{Example of unsolvable statuses}
+        \caption{This two figures show an initial status (a) and terminal
+            status (b), which cannot be solved. There is no way how car 0 can be
+        moved past car 1.}
+        \label{fig:unsolvable}
+    \end{center}
+\end{figure}
