@@ -4,15 +4,18 @@ Graph of vertices (nodes) of parking places and so forward.
 \TODO{sets and iterators}
 \TODO{Explanation of movement}
 \begin{lemma}
-    All feasible solutions to the integer model correspond to feasible
-    movements of robots and all feasible movements of the robots correspond to
-    feasible solutions to the$\ldots$
+    All feasible solutions to the integer programming model correspond to feasible
+    actions of robots and all feasible actions of the robots correspond to
+    feasible solutions to the integer programming model.
     \TODO{find good way to write this}
 \end{lemma}
 \begin{proof}
-    This will become clear from the explanations $\ldots$
+    This will become clear from the explanations of variables
+    in~\autoref{sec:variables} and explanations of constraints
+    in~\autoref{sec:constraints}.
 \end{proof}
 \subsection{Variables}
+\label{sec:variables}
 The variables for the model are all binary, meaning their allowed values are from the set
 $\{0,1\}$. There are three groups of variables:
 \begin{enumerate}
@@ -92,6 +95,7 @@ in~\autoref{tbl:decvars}.
 \end{table}
 
 \subsection{Constraints}
+\label{sec:constraints}
 \subsubsection{Helper functions and notation for constraints}
 \label{sec:helpers}
 The first helper function used is $\edg \colon \V \times \D \to \V$. Let

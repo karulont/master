@@ -251,7 +251,7 @@ We also add one odd constraint.
 \begin{align}
     \nstat_{(0,0),\stat{r},20} &= 1
 \end{align}
-And the objective used is different to encourage occupying edges and
+And the objective function used is different to encourage occupying edges and
 appearance of robots.
 \begin{align}
     \min \sum_{t \in \T}\left( -4\nstat_{(0,0), \stat{r}, t}
@@ -272,3 +272,17 @@ The objective is for robots to go to the right side.
 The model should be feasible and the optimal solution is verified by hand.
 
 \subsection{Tuning Gurobi parameters}
+Gurobi might be the best mixed integer program solver around, but as the
+problems are NP-complete, it still takes a long time to find the optimal
+solution. Gurobi has a lot of parameters that can be altered, which affect the
+total runtime~\cite{gurobiparams}. Finding a good set of parameters to tune is
+a tedious task, therefore Gurobi comes with an automatic tuning tool. The
+tuning tool has an API, but the easiest way is to run it from command line as a
+separate tool called \textit{grbtune}.
+
+The tuning tool will take as input integer programming models and then optimize
+them many times in a row to establish a baseline performance. After the
+baseline is established it will try different set of parameters and in the
+outputs those sets that improved on the baseline performance.
+
+\TODO{explain each found parameter}
