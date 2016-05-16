@@ -159,15 +159,42 @@ on~\autoref{fig:manyspaces}.
 From the~\autoref{tbl:times}, it can be seen that all the times are multiples
 of 1.5 seconds. So we can ignore the actual speeds and dimensions. We can just
 use multiplies of 1.5 seconds, which we will call timesteps. One timestep is
-equal to 1.5 seconds.
+equal to 1.5 seconds. All the movements take a discrete number of timesteps.
+And every movements ends up in the exact center of the parking place.
 
 For the car park, we use graph $\mathcal{G} = (\V,\E)$, where every vertex is a
 parking space and every edge $(u,v)$ means that there is no obstacle between
 parking spaces~$u$ and~$v$. The parking places can be at most 4-way-connected,
 with the connections corresponding to directions in $\D$.
 
-Every parking space has status. We let $K$ be the number of different types of
-car, the problem has. Possible set of node statuses is $\W$.
+Every parking space has status. We let $K$ be the number of different labels we
+want to give to cars. All possible node statuses are described
+in~\autoref{tbl:statuses}.
+
+\begin{table}
+    \begin{center}
+        \begin{tabular}{| c | c |}
+            \hline
+            Status & Meaning \\
+            \hline
+            \stat{e} & Parking space is empty.\\
+            \stat{r} & There is robot on the parking space.\\
+            \stat{i} & There is a car with label $i$ in
+            the parking space.\\
+            \stat{ri} & There is a car with label $i$ and a robot is under it.\\
+            \stat{ir} & There is a robot carrying the car with label $i$.\\
+            \stat{lft} & There is a robot in the process of lifting a car.\\
+            \stat{drp} & There is a robot in the process of dropping a car.\\
+            \hline
+        \end{tabular}
+        \TODO{make this table nice}
+        \caption{We all different possible statuses of parking spaces with
+            their descriptions. Note that $\stat{i} \in \{0,\ldots,K-1\}$. So
+            when there is a robot carrying car with label 2, the status should
+            be \stat{2r}, not \stat{ir}.}
+        \label{tbl:statuses}
+    \end{center}
+\end{table}
 
 \TODO{Infeasible initial and terminal status, with example}
 Sometimes a given initial status with given terminal status is unsolvable no
@@ -178,8 +205,8 @@ see~\autoref{fig:unsolvable}.
     \begin{center}
         \missingfigure{Example of unsolvable statuses}
         \caption{This two figures show an initial status (a) and terminal
-            status (b), which cannot be solved. There is no way how car 0 can be
-        moved past car 1.}
+            status (b), which cannot be solved. There is no way how car with
+            label 0 can be moved past car with label 1.}
         \label{fig:unsolvable}
     \end{center}
 \end{figure}
