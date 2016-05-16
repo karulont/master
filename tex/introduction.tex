@@ -90,13 +90,46 @@ to reach adjacent parking space in the longer dimension and 4.5 seconds for
 shorter dimension. Speed versus time graph of all of those movements is
 on~\autoref{fig:moving times}, the area under those lines is equal to the
 dimensions of the parking space.
-
 \begin{figure}[h]
     \begin{center}
         \input{fig/moving-times}
         \caption{This figure shows all the possible movements to an adjacent
         parking space.}
         \label{fig:moving times}
+    \end{center}
+\end{figure}
+
+When a robot decides to move many spaces in one direction the distance traveled
+is equal to distance traveled: while accelerating, while de-accelerating and
+while moving with full speed. For an empty robot the distance traveled while
+accelerating and de-accelerating sums to 3 meters. For each additional parking
+place traveled we need 1.5 seconds for $\De$ or $\Dw$ direction. For $\Dn$ or
+$\Ds$ direction we first need to add 1.5 seconds for the first space and 3
+seconds for each additional parking space. For an loaded robot the distance traveled
+while accelerating and de-accelerating sums to 1.5 meters. For the shorter
+dimension of the parking space, we need additional 1.5 seconds, to reach a full 3
+meters. For additional spaces, we need to add 3 seconds for each additional
+space traveled. For the longer dimension, we need additional 4.5 seconds, and
+for each additional space we need to add 6 seconds to reach the desired
+distance.
+
+As an example, lets consider that a loaded robot want to move 3
+parking spaces in the direction $\Dn$. The total distance needed to cover is
+$3\times 6 = 18$ meters. The time it takes is $3 + 4.5 + 2 \times 6 = 19.5s$
+seconds. Lets verify that the distance is right: for 3 second we are
+accelerating and de-accelerating, with top speed 1 $\frac{m}{s}$, the average
+speed being 0.5 $\frac{m}{s}$. Other time we are moving with top speed which is 1
+$\frac{m}{s}$. The distance traveled will be $3 * 0.5 + 4.5 \times 1 + 2(6
+\times 1) = 18$ meters. An additional example is shown
+on~\autoref{fig:manyspaces}.
+\begin{figure}[h]
+    \begin{center}
+        \input{fig/manyspaces}
+        \caption{This figure shows the movement of an empty robot in $\Dn$ or
+            $\Ds$ direction with moving for 2 parking spaces. The total distance
+            traveled is 12 meters, which is exactly the length of 2 parking spaces in
+        that direction.}
+        \label{fig:manyspaces}
     \end{center}
 \end{figure}
 
@@ -110,21 +143,31 @@ dimensions of the parking space.
             Drop car & 3\\
             Accelerate to full speed & 1.5\\
             Deacceleration from full speed to stop & 1.5\\
+            Loaded robot moving to adjacent space (N or S) & 7.5\\
+            Loaded robot moving to adjacent space (E or W) & 4.5\\
+            Empty robot moving to adjacent space (N or S) & 3\\
+            Empty robot moving to adjacent space (E or W) & 4.5\\
             \hline
         \end{tabular}
         \TODO{make this table nice}
-        \caption{The table describing the times some action will take}
+        \caption{We list different actions and the time they need to complete.}
         \label{tbl:times}
     \end{center}
 \end{table}
 \subsection{Simplified discrete problem}
 \label{sec:discrete problem}
 From the~\autoref{tbl:times}, it can be seen that all the times are multiples
-of 1.5 seconds. We still need to verify that the time to move from parking
-place to another is indeed a multiple of 1.5 seconds.
-In~\autoref{fig:moving-times} all different possible robot movements are shown
-with the distance traveled calculated. From the figures it is quite easy to see
-that the distance traveled is equal to the dimensions of parking places.
+of 1.5 seconds. So we can ignore the actual speeds and dimensions. We can just
+use multiplies of 1.5 seconds, which we will call timesteps. One timestep is
+equal to 1.5 seconds.
+
+For the car park, we use graph $\mathcal{G} = (\V,\E)$, where every vertex is a
+parking space and every edge $(u,v)$ means that there is no obstacle between
+parking spaces~$u$ and~$v$. The parking places can be at most 4-way-connected,
+with the connections corresponding to directions in $\D$.
+
+Every parking space has status. We let $K$ be the number of different types of
+car, the problem has. Possible set of node statuses is $\W$.
 
 \TODO{Infeasible initial and terminal status, with example}
 Sometimes a given initial status with given terminal status is unsolvable no
