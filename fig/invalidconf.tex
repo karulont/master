@@ -1,0 +1,24 @@
+\begin{tikzpicture}[show background rectangle]
+% nodes
+
+\foreach \y in {4, 1}
+{
+    \draw[gray,thick] (0,\y-0.75) -- (5,\y-0.75);
+    \draw[fill=gray!30] (0,\y) rectangle (1.5, \y-1.5);
+    \draw[fill=gray!30] (2,\y) rectangle (3.5, \y-1.5);
+    \draw[fill=gray!30] (4,\y) rectangle (5.5, \y-1.5);
+}
+
+\draw[fill=blue] (0.75,3.25) node {0} circle (0.6);
+\draw[fill=green] (2.75,3.25) node {R} circle (0.6);
+\draw[fill=red] (4.75,3.25) node {1} circle (0.6);
+
+\draw[fill=red] (0.75,0.25) node {1} circle (0.6);
+\draw[fill=green] (2.75,0.25) node {R} circle (0.6);
+\draw[fill=blue] (4.75,0.25) node {0} circle (0.6);
+
+\node at (2.75, 2) {Initial configuration};
+\node at (2.75, -1) {Terminal configuration};
+
+\end{tikzpicture}
+

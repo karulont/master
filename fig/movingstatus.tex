@@ -1,0 +1,39 @@
+\begin{tikzpicture}[show background rectangle]
+% nodes
+
+\foreach \y in {9, 7, 5, 3, 1}
+{
+    \draw[gray,thick] (0,\y-0.75) -- (5,\y-0.75);
+    \draw[fill=gray!30] (0,\y) rectangle (1.5, \y-1.5);
+    \draw[fill=gray!30] (2,\y) rectangle (3.5, \y-1.5);
+    \draw[fill=gray!30] (4,\y) rectangle (5.5, \y-1.5);
+}
+
+\draw[thick, ->] (7,9) -- (7,0) node[below] {timesteps};
+
+\draw[fill=green] (0.75,8.25) node {R} circle (0.6);
+\draw[fill=green] (1.75,6.25) node {R} circle (0.6);
+\draw[fill=green] (2.75,4.25) node {R} circle (0.6);
+\draw[fill=green] (3.75,2.25) node {R} circle (0.6);
+\draw[fill=green] (4.75,0.25) node {R} circle (0.6);
+
+\node at (0.75, 7.25) {\stat{r}};
+\node at (2.75, 7.25) {\stat{e}};
+\node at (4.75, 7.25) {\stat{e}};
+
+\node at (0.75, 5.25) {\stat{r}};
+\node at (2.75, 5.25) {\stat{e}};
+\node at (4.75, 5.25) {\stat{e}};
+
+\node at (0.75, 3.25) {\stat{e}};
+\node at (2.75, 3.25) {\stat{r}};
+\node at (4.75, 3.25) {\stat{e}};
+
+\node at (0.75, 1.25) {\stat{e}};
+\node at (2.75, 1.25) {\stat{r}};
+\node at (4.75, 1.25) {\stat{e}};
+
+\node at (0.75, -0.75) {\stat{e}};
+\node at (2.75, -0.75) {\stat{e}};
+\node at (4.75, -0.75) {\stat{r}};
+\end{tikzpicture}

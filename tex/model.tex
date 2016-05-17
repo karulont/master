@@ -631,7 +631,7 @@ Next are the lift and drop variables that happened in the past.
     \end{cases}
 \end{align}
 Now there are the movement variables. Only continue and stop variables actually
-correspond to node status changes.
+correspond to immediate node status changes.
 \todo{$w_m$ is wrong here}
 \begin{align}
     \A_{\mathrm{move}} &= \begin{cases}
@@ -641,7 +641,7 @@ correspond to node status changes.
     \end{cases}\\
     \B_{\mathrm{move}} &= \begin{cases}
         \{\contOrStop_{v,w_m,d+2,t} \mid w_m \in \Wm \wedge \getMC(w_m) = w\} \IFc
-        (\edg(u,d),u) \in \E\\
+        (u,\edg(u,d)) \in \E\\
         \emptyset \IFco
     \end{cases}
 \end{align}
@@ -650,20 +650,23 @@ Now that we have defined all the subpart we join them together.
     \B &= \B_{\mathrm{lift}} \cup \B_{\mathrm{drop}} \cup \B_{\mathrm{move}} \\
     \A &= \A_{\mathrm{lift}} \cup \A_{\mathrm{drop}} \cup \A_{\mathrm{move}}
 \end{align}
-Now we can finally give the constraints.
+Now we can finally give the constraints. The following constraints say that
+only one action from the set of node status changing actions can happen at
+once. There are two sets, because with simultaneous movement, it can happen
+that one action is for moving away and another for moving into~$u$.
 \todo{Write explanations}
 \begin{align}
     \sum_{v \in \B} v \leq 1\\
     \sum_{v \in \A} v \leq 1
 \end{align}
+When node status for~$u$ is~$w$, the node status has to remain same or some
+kind of action must have changed it.
 \begin{align}
     \nstat_{u,w,t} - \nstat_{u,w,t+1} -\sum_{v \in \B} v -\sum_{v \in \A} v
     \leq 0
 \end{align}
-\begin{align}
-    \nstat_{u,w,t} - \nstat_{u,w,t+1} +\sum_{v \in \B} v +\sum_{v \in \A} v
-    \leq 2
-\end{align}
+If node status in the future is~$w$ and something came into the node, another
+thing must have left the node.
 \begin{align}
     \nstat_{u,w,t+1} +\sum_{v \in \B} v -\sum_{v \in \A} v
     \leq 1

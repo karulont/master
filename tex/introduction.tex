@@ -196,17 +196,42 @@ in~\autoref{tbl:statuses}.
     \end{center}
 \end{table}
 
+When a object moves from node~$u$ to an adjacent node $v$, the initial node
+status remains the same for the whole duration of the movement. Meaning that
+even though the moving object partly blocks both~$u$ and~$v$, the node statuses
+for~$u$ and ~$v$ will still be the old ones, until the moving object reaches the center
+of~$v$, at which point node statuses are updated. As an example of this
+see~\autoref{fig:movingstatus}.
+
+\begin{figure}[h]
+    \begin{center}
+        \input{fig/movingstatus}
+        \caption{This diagram serves as an illustration for node statuses
+            during movement. Each row represents a seperate timestep of the
+            same nodes. Gray boxes represent parking spaces and the green
+            circle represents a moving robot. Below each parking space is the node
+        status.}
+        \label{fig:movingstatus}
+    \end{center}
+\end{figure}
+
+The problem is to find a suitable sequence of actions for robots, to
+reconfigure the given initial configuration into the terminal configuration.
+Both initial and terminal configurations are given by node statuses for every
+one.
+
 \TODO{Infeasible initial and terminal status, with example}
 Sometimes a given initial status with given terminal status is unsolvable no
-matter how many timesteps are considered. For an example
+matter how many timesteps are considered. For a very simple example
 see~\autoref{fig:unsolvable}.
 
 \begin{figure}[h]
     \begin{center}
-        \missingfigure{Example of unsolvable statuses}
-        \caption{This two figures show an initial status (a) and terminal
-            status (b), which cannot be solved. There is no way how car with
-            label 0 can be moved past car with label 1.}
+        \input{fig/invalidconf}
+        \caption{This figure shows a pair of initial and terminal statuses,
+            which cannot be solved. Green robot can move under the cars, but there
+            is no way how red car can exchange places with the blue car without
+        colliding.}
         \label{fig:unsolvable}
     \end{center}
 \end{figure}
