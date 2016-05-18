@@ -1,8 +1,31 @@
 \section{Integer programming model}
 \TODO{Write introduction to the model}
-Graph of vertices (nodes) of parking places and so forward.
-\TODO{sets and iterators}
+\TODO{Should I repeat things mentioned in the introduction? ($\V,\E,\W)$ (sets and
+iterators)}
+We have to fix the number of timesteps that the model has. We use $\T =
+\{0,\ldots,t_{\max}\}$ to denote the set of all timesteps in the model.
+
+Now we define some subsets of node statuses. We start with~$\Wl$, a set of
+statuses where robot is under a car and decision to lift it can be made. Second
+is almost the opposite set~$\Wd$, which containts all the statuses, where robot
+is carrying a car and decision to drop it can be made. Third set is~$\Wm$ and
+it consists of statuses, that correspond to moving components. A robot can
+move and a robot carrying a car can move.
+\begin{align}
+    \Wl &= \{\stat{ri} \mid i \in \{0,\ldots,K-1\}\}\\
+    \Wd &= \{\stat{ir} \mid i \in \{0,\ldots,K-1\}\}\\
+    \Wmc &= \Wd \cup \{\stat{r}\}
+\end{align}
+
 \TODO{Explanation of movement}
+De-accelerating a moving robot takes 1 timestep. Therefore, the decision to continue
+moving in the same direction or to stop has to be made 1 timestep before
+arriving at and adjacent node. Since we change the node statuses only when we
+arrive at the center of parking place as illustrated
+on~\autoref{fig:movingstatus}, the decisions to continue or stop moving are
+also made on the same node. The object has not yet arrived at the other node,
+so it does not make sense tie to decision with the destination node.
+
 \begin{lemma}
     All feasible solutions to the integer programming model correspond to feasible
     actions of robots and all feasible actions of the robots correspond to
@@ -26,13 +49,13 @@ $\{0,1\}$. There are three groups of variables:
 For every timestep, there is another layer of the variables. Meaning that if
 we have $n$ variables for timestep $0$, and we have $t$ timesteps, then in total
 there will be $tn$ variables in the model. In the variable indexing, the
-timestep is the always the last index.
+timestep is always the last index.
 
 \subsubsection{Node status variables}
 As specified in \autoref{sec:discrete problem}, there are many possible statuses
 for parking spots. Node status variables are meant to encode the node status.
 There is a variable for every combination of node, status and timestep. To be
-more accurate, the group of node status variables is defined as
+more accurate, the group of node status variables is defined as following.
 \begin{align}
     &\forall v \in \V \colon \forall w \in \W \colon \forall t \in \T \colon &
     \nstat_{v,w,t}
@@ -42,20 +65,24 @@ more accurate, the group of node status variables is defined as
 There are variables for each directed edge between parking spots. When a robot
 moves from vertex $u$ to vertex $v$ at timestep $t$, the edge variable
 $\occu_{(u,v),t}$ is 1 to indicate that the edge is occupied. All edge variables
-are defined as
+are defined as:
 \begin{align}
     &\forall e \in \E \colon \forall t \in \T \colon & \occu_{e,t}
 \end{align}
 
 \subsubsection{Decision variables}
 This is the most important group of variables, because they represent the
-decisions or actions that the model should find. The decision variables are
+decisions or actions that the model should find. Before we can give them, we
+have to introduce a little function $\dir \colon \E \to \D$. Since we are
+operating on not just any graph, but on a grid, we can determine the direction
+of the edge and $\dir$ does exactly that. The decision variables are the
+following.
 \begin{align}
     &\forall e=(u,v) \in \E \colon \forall w \in \Wmc \colon \forall t \in \T \colon
     & \go_{u,w,\dir(e),t}\\
     &\forall e=(u,v) \in \E \colon \forall w \in \Wmc \colon \forall t \in \T
     \colon & \cont_{u,w,\dir(e),t}\\
-    &\forall e=(u,v) \in \V \colon \forall w \in \Wmc \colon \forall t \in \T
+    &\forall e=(u,v) \in \E \colon \forall w \in \Wmc \colon \forall t \in \T
     \colon & \stp_{u,w,\dir(e),t}\\
     &\forall v \in \V \colon \forall w \in \Wl \colon \forall t \in \T \colon &
     \lift_{v,w,t}\\
@@ -75,17 +102,17 @@ in~\autoref{tbl:decvars}.
         \hline
         Variable & Meaning\\
         \hline
-        $\go_{v,w,d,t}$ & At timestep $t$ on parking place $v$ with node status
+        $\go_{v,w,d,t}$ & At timestep $t$ on parking space $v$ with node status
         $w$, a robot starts to accelerate in direction $d$.\\ \hline
-        $\cont_{v,w,d,t}$ & At timestep $t$ on parking place $v$ with node status
+        $\cont_{v,w,d,t}$ & At timestep $t$ on parking space $v$ with node status
         $w$ a robot that is about to reach the neighbouring node in direction
         $d$, does not slow down and continues moving in direction $d$.\\ \hline
-        $\stp_{v,w,d,t}$ & At timestep $t$ on parking place $v$ with node status
+        $\stp_{v,w,d,t}$ & At timestep $t$ on parking space $v$ with node status
         $w$ a robot that is about to reach the neighbouring node in direction
         $d$, starts to de-accelerate to stop in the neighbouring node.\\ \hline
-        $\lift_{v,w,t}$ & At timestep $t$ on parking place $v$ with node status
+        $\lift_{v,w,t}$ & At timestep $t$ on parking space $v$ with node status
         $w$ a robot starts to lift a car.\\ \hline
-        $\drop_{v,w,t}$ & At timestep $t$ on parking place $v$ with node status
+        $\drop_{v,w,t}$ & At timestep $t$ on parking space $v$ with node status
         $w$ a robot starts to drop a car.\\
         \hline
     \end{tabular}
@@ -94,30 +121,42 @@ in~\autoref{tbl:decvars}.
     \label{tbl:decvars}
 \end{table}
 
-\subsection{Tests written to aid development}
-Complexity of the interger programming model is large enough to not fit into
-the working memory of humans. Humans can keep about 7 things in their working
-memory at once~\cite{magic7}. When developing the model a lot of time was
-consumed by manually altering the initial status of the model and then checking
-if the feasible optimal solution to model was indeed a valid sequence of
-actions. To cut down the time on manual rewriting of the initial status and
-manual checking of solutions, several test scenarios were created.
+\subsection{Example configurations to illustrate the model}
+Before diving into constraints, we give 12 small configurations which will
+illustrate the meaning of variables and our assumptions about the integer
+programming model.
 
-Some of these test are meant to be infeasible. Others have expected outcomes,
-which are checked. When an specific objective function is not mentioned, the
-objective function will be left empty for that test.
+As a side remark: complexity of the integer programming model is large enough
+to not fit into the working memory of humans. Humans can keep about 7 things in
+their working memory at once~\cite{magic7}. When developing the model a lot of
+time was consumed by manually altering the initial status of the model and then
+verifying if the feasible optimal solution to model was indeed a valid sequence
+of actions. To cut down the time on manual rewriting of the initial status and
+manual verifying of solutions, these illustration configurations were also used
+for testing the model during development.
 
-The initial node statuses are fixed for every test. To easily display the
-initial statuses, we use images that depict the underlying graph of the problem
-and the node statuses at timestep 0. In the images, nodes are represented as
-circles. They gray lines between nodes show that there is an edge between those
-vertices. Inside the circles the upper text shows the node status and the lower
-text shows the identifier of the node.
+Testing was needed to avoid typos like writing $v$ or even $u$ instead of $v'$.
+Also there were some occurrences, where we made wrong assumptions, because there
+are so many cases to consider for a simple action.\todo{Write something more
+meaningful here.}
+
+Some of these illustrations or tests are meant to be infeasible. Others have
+expected outcomes, which are automatically verified . When an specific
+objective function is not mentioned, the objective function will be left empty
+for that test. By empty objective we means that the objective function is~$\min
+0$.
+
+The initial node statuses are fixed for every configuration. To easily display
+the initial statuses, we use images that depict the underlying graph of the
+problem and the node statuses at timestep 0. In the images, nodes are
+represented as circles. They gray lines between nodes show that there is an
+edge between those vertices. Inside the circles the upper text shows the node
+status and the lower text shows the identifier of the node.
 \subsubsection{Collision}
 The purpose of this test is to make sure head on collisions are infeasible in
 the model.
 \testImage{collision}{Initial node statuses for collision test.}
-To force a collision, we use the following constraints to fix the values of some decision
+To force a collision, we use the following constraints to fix the values of two decision
 variables.
 \begin{align}
     \go_{(0,1),\stat{r},\De,0} &= 1\\
@@ -129,17 +168,19 @@ Next test makes sure two robots cannot move into the same node at the same
 time.
 \testImage{collision2}{Initial node statuses for collision test with same
 destination.}
-The constraints force both of the robots to start moving to node $(1,0)$.
+The following constraints oblige both of the robots to start moving to node $(1,0)$.
 \begin{align}
     \go_{(2,0),\stat{r},\Dw,0} &= 1\\
     \go_{(1,1),\stat{r},\Dn,0} &= 1
 \end{align}
 As with the last test, this model should be infeasible.
 \subsubsection{Collision with special}
-Last two test made sure that robots cannot collide, but another test is needed
+Last two tests made sure that robots cannot collide, but another test is needed
 for robots carrying cars with different labels.
 \testImage{collisionspecial}{Initial node statuses for collision test with
 loaded robots}
+We use the following constraints, which are very similar to constraints used in
+the head-on collision test.
 \begin{align}
     \go_{(0,1),\stat{0r},\De,0} &= 1\\
     \go_{(1,1),\stat{1r},\Dw,0} &= 1
@@ -149,13 +190,26 @@ As with other collision tests, the model should be infeasible.
 We also have a test for collision with orthogonal directions.
 \testImage{collisionorth}{Initial node statuses for collision test with
 orthogonal directions}
-Here robot on $(1,0)$ is moving away from it, and robot on $(1,1)$ is trying to
-move into $(1,0)$. This collision was explained in~\autoref{fig:orthcol}.
+We use the following constraints to fix the movements.
 \begin{align}
     \go_{(1,0),\stat{r},\Dw,0} &= 1\\
     \go_{(1,1),\stat{r},\Dn,0} &= 1
 \end{align}
-Because of the collision, the model should be infeasible.
+Here robot on $(1,0)$ is moving away from it, and robot on $(1,1)$ is trying to
+move into $(1,0)$. This kind of collision is explained
+with~\autoref{fig:orthcol}. Because of the collision, the model should be
+infeasible.
+
+\begin{figure}[h]
+    \begin{center}
+        \input{fig/orthcol}
+        \caption{Green rectangles are robots and gray rectangles are parking
+            spaces. One robot is moving away from a parking space and another is
+        moving toward it from an orthogonal direction. This causes a collision.}
+        \label{fig:orthcol}
+    \end{center}
+\end{figure}
+
 \subsubsection{Collision with itself}
 This is a test to see that edge constraints have the right number of timesteps.
 \testImage{collisionself}{Initial node statuses for collision test with
@@ -337,13 +391,6 @@ No more than one moving thing can arrive at the same node at the same time.
     &\forall v \in \V \colon \forall t \in \T \colon & \sum_{u \in \N(v)}
     \occu_{(u,v),t} \leq 1
 \end{align}
-\TODO{Maybe }
-\begin{figure}[h]
-    \missingfigure{draw a figure showing the collision we avoid, using these
-    constraints}
-    \caption{This kind of movement will cause collision.}
-    \label{fig:orthcol}
-\end{figure}
 We also want to forbid movements in the orthogonal directions.
 \begin{equation}
     \begin{split}
