@@ -211,7 +211,9 @@ infeasible.
 \end{figure}
 
 \subsubsection{Collision with itself}
-This is a test to see that edge constraints have the right number of timesteps.
+This is a test to see that edge constraints make edges occupied for the right
+number of timesteps. The initial conditions are forced with the following
+constraints.
 \testImage{collisionself}{Initial node statuses for collision test with
 itself.}
 \begin{align}
@@ -221,15 +223,15 @@ itself.}
 When the edges are occupied for longer than actually needed, the model will
 become infeasible, because the first movement marks edge $((2,0),(1,0))$ as
 occupied, and the second movement marks edge $((1,0),(2,0))$ as occupied. And
-they cannot be both occupied at the same time thanks to
-constraint~\eqref{eq:antiedges}.
+they cannot be both occupied at the same time because that would be a
+collision.
 
 This model should be feasible.
 \subsubsection{Simultaneous movement}
 With this test, we make sure that robots can move in the same direction side by
 side.
 \testImage{movetogether}{Initial node statuses for simultaneous movement test.}
-Both robots are forced to move at the start.
+Both robots are forced to move at the start by following constraints.
 \begin{align}
     \go_{(1,0),\stat{r},\Dw,0} &= 1\\
     \go_{(2,0),\stat{r},\Dw,0} &= 1
@@ -244,7 +246,8 @@ checks, which should hold for all feasible solutions.
 
 \subsubsection{Simultaneous movement II}
 This is quite similar to last test, but now we have other than empty nodes in
-the way and one of the robots is also carrying a car.
+the way and one of the robots is also carrying a car. All the robots are forced
+to start moving to $\Dw$ by following constraints.
 \testImage{movetogetherdiff}{Initial node statuses for simultaneous movement
     test with a car on the way and the last robot carrying a car.}
 \begin{align}
@@ -254,7 +257,7 @@ the way and one of the robots is also carrying a car.
     \go_{(4,0),\stat{0r},\Dw,0} &= 1
 \end{align}
 The model should be feasible and optimal solution is verified by following
-checks.
+checks, which verify that node statuses after movement are correct.
 \begin{align}
     \nstat_{(1,0), \stat{r1}, 2} &\ife 1\\
     \nstat_{(1,0), \stat{r}, 2} &\ife 1\\
@@ -264,10 +267,12 @@ checks.
 \end{align}
 
 \subsubsection{Invalid simultaneous movement}
-This test checks if node statuses are handled correctly when things move
-together.
+This test checks if node statuses are handled correctly when robots move
+side-by-side.
 \testImage{movetogetherbad}{Initial node statuses for simultaneous
     movement test with an invalid node status constraint.}
+We force simultaneous movement and an invalid node status after the movement
+with these constraints.
 \begin{align}
     \go_{(1,0),\stat{r},\Dw,0} &= 1\\
     \go_{(2,0),\stat{r},\Dw,0} &= 1\\
@@ -277,16 +282,18 @@ The status of node $(1,0)$ after the movement, at timestep 2 should
 be~$\stat{r}$. However, we give a constraint which should make the model
 infeasible.
 \subsubsection{Lift and move}
-This test checks if the model can find a correct solution to a simple problem.
+This test checks, if the model can find a correct solution to a simple problem.
 \testImage{liftandmove}{Initial node statuses for the lift and move test.}
 This time instead of adding constraints to force some actions, we define the
-objective function.
+objective function. The objective is to get a robot and a car labeled 0 to node
+$(0,0)$ as soon as possible.
 \begin{align}
     \min \sum_{t \in \T} -\nstat_{(0,0), \stat{r0}, t}
 \end{align}
 Correct solution would be for the robot to move into the middle node $(1,0)$,
 lift the car from there and carry it to $(0,0)$ and finally drop it there. The
-solution is checked against the following conditions.
+model should be feasible and solution is checked against the following
+conditions.
 \begin{align}
     \nstat_{(0,0), \stat{e}, 2} &\ife 1\\
     \nstat_{(1,0), \stat{r0}, 2} &\ife 1\\
@@ -320,9 +327,10 @@ The solution is checked against these conditions.
     \nstat_{(1,0), \stat{1r}, 8} &\ife 1\\
     \nstat_{(0,0), \stat{1r}, 11} &\ife 1
 \end{align}
-When the previous test failed, the model did something else to obtain a better
-objective value. This test was added to see, if a legal sequence of decisions
-was indeed feasible during the development of constraints.
+When the previous test failed, the model did found some infeasible movement to
+obtain a better objective value. This test was added to see, if a legal
+sequence of decisions was indeed feasible and we have not accidentally over constrained the
+model.
 \subsubsection{Persistence, no robots}
 This test is to make sure that node statuses stay the same when there are no
 robots.
@@ -331,8 +339,8 @@ We also add one odd constraint.
 \begin{align}
     \nstat_{(0,0),\stat{r},20} &= 1
 \end{align}
-And the objective function used is different to encourage occupying edges and
-appearance of robots.
+And the objective function used encourages the model to occupy edges and
+make robots appear.
 \begin{align}
     \min \sum_{t \in \T}\left( -4\nstat_{(0,0), \stat{r}, t}
     -4\nstat_{(1,0),\stat{r},t} -\sum_{e \in \E} \occu_{e,t} \right)
@@ -342,14 +350,17 @@ infeasible.
 
 \subsubsection{Continue together}
 This tests makes sure that robots can continue moving in one direction, even
-when moving together. Actually it tests both a single robot continuing and at
-the same time also 2 robots continuing together.
+when moving simultaneously. Actually it tests a single robot continuing and at
+the same time also 2 robots continuing simultaneously.
 \testImage{largetest}{Initial node statuses for the continue test.}
+
 The objective is for robots to go to the right side.
 \begin{align}
     \min \sum_{t \in \T} -\nstat_{(3,0), \stat{r}, t} -\nstat_{(3,1),\stat{r},t} -\nstat_{(2,1),\stat{r},t}
 \end{align}
 The model should be feasible and the optimal solution is verified by hand.
+Valid solution would have robots in the east at the last timestep. And robots
+do not stop at intermediate nodes.
 
 \subsection{Constraints}
 \label{sec:constraints}
