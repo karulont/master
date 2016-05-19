@@ -176,4 +176,12 @@ tuning tool found was:
 \begin{itemize}
     \item AggFill = 5
 \end{itemize}
-\TODO{explain each found parameter}
+
+Now we briefly explain the settings. In the first case MIPFocus is used to
+controls the focus of MIP solver. Focus 2 means to work on the best bound.
+Presolve controls the aggressiveness of pre-solving the model. Value of 2 means
+that pre-solving is aggressive. PrePasses is used to limit the number of
+pre-solving passes. Cuts = 0 turns off all cut generations. AggFill controls
+the fill level in pre-solve aggregations, with larger values generally lead to
+more presolved rows and columns, but at the same time leave more non-zeros in
+the constraint matrix~\cite{gurobiparams}.
