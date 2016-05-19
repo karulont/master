@@ -167,52 +167,6 @@ with the connections corresponding to directions in $\D$.
 
 We let $K$ be the number of different labels we want to give to cars. We do not
 give robots labels, because for our simplification, they are indistinguishable.
-Every parking space has status. All possible node statuses are described
-in~\autoref{tbl:statuses}. We denote the set of all node statuses as~$\W$.
-
-\begin{table}
-    \begin{center}
-        \begin{tabular}{| c | c |}
-            \hline
-            Status & Meaning \\
-            \hline
-            \stat{e} & Parking space is empty.\\
-            \stat{r} & There is robot on the parking space.\\
-            \stat{i} & There is a car with label $i$ in
-            the parking space.\\
-            \stat{ri} & There is a car with label $i$ and a robot is under it.\\
-            \stat{ir} & There is a robot carrying the car with label $i$.\\
-            \stat{lft} & There is a robot in the process of lifting a car.\\
-            \stat{drp} & There is a robot in the process of dropping a car.\\
-            \hline
-        \end{tabular}
-        \TODO{make this table nice}
-        \caption{We list all possible statuses of parking spaces with their
-            descriptions. Note that $\stat{i} \in \{0,\ldots,K-1\}$. So when
-            there is a robot carrying car with label 2, the status should be
-            \stat{2r}, not \stat{ir}.}
-        \label{tbl:statuses}
-    \end{center}
-\end{table}
-
-When a object moves from node~$u$ to an adjacent node $v$, the initial node
-status remains the same for the whole duration of the movement. Meaning that
-even though the moving object partly blocks both~$u$ and~$v$, the node statuses
-for~$u$ and ~$v$ will still be the old ones, until the moving object reaches the center
-of~$v$, at which point node statuses are updated. As an example of this
-see~\autoref{fig:movingstatus}.
-
-\begin{figure}[h]
-    \begin{center}
-        \input{fig/movingstatus}
-        \caption{This diagram serves as an illustration for node statuses
-            during movement. Each row represents a seperate timestep of the
-            same nodes. Gray boxes represent parking spaces and the green
-            circle represents a moving robot. Below each parking space is the node
-        status.}
-        \label{fig:movingstatus}
-    \end{center}
-\end{figure}
 
 The problem is to find a suitable sequence of actions for robots, to
 reconfigure the given initial configuration into the terminal configuration.

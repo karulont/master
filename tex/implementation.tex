@@ -141,11 +141,11 @@ End
 \subsection{Tuning Gurobi parameters}
 Gurobi might be the best mixed integer program solver around, but as the
 problems are NP-complete, it still takes a long time to find the optimal
-solution. Gurobi has a lot of parameters that can be altered, which affect the
-total runtime~\cite{gurobiparams}. Finding a good set of parameters to tune is
-a tedious task, therefore Gurobi comes with an automatic tuning tool. The
-tuning tool has an API, but the easiest way is to run it from command line as a
-separate tool called \textit{grbtune}.
+solution. Gurobi has a lot of parameters~\cite{gurobiparams} that can be
+altered, which affect the total runtime. Finding a good set of parameters to
+tune is a tedious task, therefore Gurobi comes with an automatic tuning tool.
+The tuning tool has an API, but the easiest way is to run it from command line
+as a separate tool called \textit{grbtune}.
 
 The tuning tool will take as input integer programming models and then optimize
 them many times in a row to establish a baseline performance. After the
