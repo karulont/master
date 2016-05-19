@@ -229,7 +229,19 @@ collision.
 This model should be feasible.
 \subsubsection{Simultaneous movement}
 With this test, we make sure that robots can move in the same direction side by
-side.
+side, for explanation see~\autoref{fig:simumove}.
+
+\begin{figure}[h]
+    \begin{center}
+        \input{fig/simumove}
+        \caption{Green rectangles are robots and gray rectangles are parking
+            spaces. Both robots are moving in the same direction without a
+            collision as long as the left robot is not moving faster then the right
+        one.}
+        \label{fig:simumove}
+    \end{center}
+\end{figure}
+
 \testImage{movetogether}{Initial node statuses for simultaneous movement test.}
 Both robots are forced to move at the start by following constraints.
 \begin{align}
@@ -364,10 +376,14 @@ do not stop at intermediate nodes.
 
 \subsection{Constraints}
 \label{sec:constraints}
-\subsubsection{Helper functions and notation for constraints}
+In this section we give the constraints of the integer programming model. Some
+of these constraints are redundant, but they might help the solver and they
+also provide a meaningful bound for some abbreviations.
+\todo{Check this}
+\subsubsection{Helper functions and some notations}
 \label{sec:helpers}
 The first helper function used is $\edg \colon \V \times \D \to \V$. Let
-$\edg(v,d)$ denote the node that is in the direction $d$ from node $v$.
+$\edg(v,d)$ denote the node adjacent to $v$ that is in the direction $d$ from node $v$.
 
 For directions we use $d + 1$ to denote the next direction from direction $d$ in
 clockwise manner. Logically $d - 1$ is used to mark the next direction from $d$
@@ -376,13 +392,49 @@ in counterclockwise manner. For an example: $\Dn + 1 = \De$.
 Some decisions take a specified amount of time. We want to disallow making such
 decisions, which lead to actions that cannot be completed in the time frame of
 the model. For this purpose we want to split $\T$ into two disjoint subsets.
-Let $\T_i = \{ t | (t+i) \in \T\}$ and $\Tn_i = \T \setminus \T_i$.
+Let $\T_i = \{ t \mid (t+i) \in \T\}$ and $\Tn_i = \T \setminus \T_i$.
 
 The decisions to stop moving or continue moving are mostly used together.
-Either one of those implies that node status is about to change. For that
+Either one of these implies that node status is about to change. For that
 reason we use an abbreviation $\contOrStop_{u,w,d,t} = \cont_{u,w,d,t} +
 \stp_{u,w,d,t}$.
+
+Sometimes we need to denote the set of neighbours for a vertex. We use $\N(v)$
+to denote the neighbouring vertices of node~$v$.
+
+Depending on the direction and whether the robot is carrying a car, the
+movement takes different number of timesteps. For this, we introduce a new
+function $\getMT \colon \Wmc \times \D \to \mathbb{N}$. Function $\getMT(w,d)$
+returns the number of timesteps the movement of $w$ takes in direction $d$.
 \TODO{Add more meaningful stuff here}
+
+For working with node statuses related to moving there is a notion of moving
+component, which is the status, that can move. First is when node status
+is~$w$, we need to get the status that can move away from $w$, we define
+$\getMC \colon \Wm \to \Wmc$ as:
+\begin{align}
+    &\forall i \in \{0,\ldots,K-1\} \colon &\getMC(\stat{ri}) &= \stat{r}\\
+    &\forall i \in \{0,\ldots,K-1\} \colon &\getMC(\stat{ir}) &= \stat{ir}\\
+    & &\getMC(\stat{r}) &= \stat{r}
+\end{align}
+Next we want to know what remained in the node, when moving component was
+removed, for that we define function $\remMC\colon: \Wm \to \W$ as:
+\begin{align}
+    &\forall i \in \{0,\ldots,K-1\} \colon &\remMC(\stat{ri}) &= \stat{i}\\
+    &\forall i \in \{0,\ldots,K-1\} \colon &\remMC(\stat{ir}) &= \stat{e}\\
+    & &\remMC(\stat{r}) &= \stat{e}
+\end{align}
+And sometimes when a moving component comes into node with some status, we want
+to know what will the new status will be. We define a partial function $\addMC
+\colon \W \times \Wmc \to \W$ as:
+\begin{align}
+    &\forall i \in \{0,\ldots,K-1\} \colon &\addMC(\stat{e},\stat{ir}) &=
+    \stat{ir}\\
+    &\forall i \in \{0,\ldots,K-1\} \colon &\addMC(\stat{i},\stat{r}) &=
+    \stat{ri}\\
+    & &\addMC(\stat{e},\stat{r}) &= \stat{r}
+\end{align}
+
 \subsubsection{Simple constraints}
 \label{sec:simple}
 First constraint is to make sure that at every timestep each node has exactly
@@ -393,18 +445,19 @@ one status variable set.
 \end{align}
 When a directed edge is used, its opposite cannot be used at the same time.
 \begin{align}
-    \label{eq:antiedges}
     &\forall (u,v) \in \E \colon \forall t \in \T \colon & \occu_{(u,v),t} +
     \occu_{(v,u),t} \leq 1
 \end{align}
 No more than one moving thing can arrive at the same node at the same time.
 \begin{align}
+    \label{eq:edgedest}
     &\forall v \in \V \colon \forall t \in \T \colon & \sum_{u \in \N(v)}
     \occu_{(u,v),t} \leq 1
 \end{align}
 We also want to forbid movements in the orthogonal directions.
 \begin{equation}
     \begin{split}
+        \label{eq:edgeorth}
         \forall v \in \V \colon \forall d \in \D \colon \forall t \in \T \colon
         \quad & \occu_{(\edg(v,d),v),t} \\ + \occu_{(v,\edg(v,d-1)),t} + &
         \occu_{(v,\edg(v,d+1)),t} \leq 1
@@ -412,9 +465,12 @@ We also want to forbid movements in the orthogonal directions.
 \end{equation}
 Note that there are vertices such that they do not have an edge between them, or
 they do not even have a neighbour in some directions. When that happens, the
-invalid $\occu_{e,t}$ variables are not added to the sum.
-Also it does not make sense to allow more than 1 decision at the same time, at
-the same location.
+invalid $\occu_{e,t}$ variables are not added to the sums in
+constraints~\eqref{eq:edgedest} and~\eqref{eq:edgeorth}.
+
+It does not make sense to allow more than 1 decision at the same time, at
+the same location. Only one robot is at one node at one time and it cannot make
+two actions at the same time.
 \begin{equation}
     \begin{split}
         \forall v \in \V \colon \forall t \in \T \colon \quad & \sum_{d \in \D,
@@ -441,16 +497,19 @@ $\stat{lft}$.
     \nstat_{v,\stat{lft},t+i} \leq 0
 \end{align}
 And at the end of lifting, the node status should correspond to the lifted
-thing. For that we have a simple helper function $f \colon \Wl \to \Wd$. It is
-defined as: $f(\stat{rc}) = \stat{cr}$ and $\forall j \colon
-f(\stat{rsc}_j) = \stat{scr}_j$. In words, the function $f$ determines the node
-status after lifting. By using $f$ we can now give the set of constraints.
+thing. For that we have a simple bijective helper function $f \colon \Wl \to \Wd$. It is
+defined as: $\forall i \in \{0,\ldots,K-1\} \colon f(\stat{ri}) = \stat{ir}$.
+In words, the function $f$ determines the node status after lifting. By using
+$f$ we can now give the constraints, which determine the node status after
+lifting.
 \begin{align}
     &\forall v \in \V \colon \forall w \in \Wl \colon \forall t \in \T_6 \colon
     &\lift_{v,w,t} - \nstat_{v,f(w),t+6} \leq 0
 \end{align}
 If the lifting cannot be completed, we just make sure that the decision is
-never made.
+never made. As a reminder $\Tn_6$ is the set timesteps for which adding 6 more
+timesteps would be more that $t_{\max}$, and therefore be outside the scope of
+the model.
 \begin{align}
     &\forall v \in \V \colon \forall w \in \Wl \colon \forall t \in \Tn_6
     \colon &\lift_{v,w,t} = 0
@@ -482,52 +541,62 @@ the model, disable the decision.
 \end{align}
 
 \subsubsection{Moving constraints}
-Depending on the direction and whether the robot is carrying a car, the
-movement takes different number of timesteps. We introduce a new function $g
-\colon \W \times \D \to \mathcal{N}$. Function $g(w,d)$ returns the number of
-timesteps the movement of $w$ takes in direction $d$. 
+While constructing movement constraints, we needs some abbreviations.
+Therefore, the constraints in this section are for all combinations of $u \in
+\V$, $w \in \Wmc$, $d \in \D$ and $t \in \T$. \TODO{Fix this paragraph}
 
-Now movement constraints are tricky and constructing them needs some
-abbreviations. The constraints in this section are for all combinations of $u
-\in \V$, $w \in \Wmc$, $d \in \D$ and $t \in \T$.
-\TODO{Fix this paragraph}
-
-Now let $\td = g(w,d)$, and $\td' = \td-1$. When movement starts at time $t$,
+Now let $\td = \getMT(w,d)$, and $\td' = \td-1$. When movement starts at time $t$,
 the node status will change at time $t+\td$, and at time $t+\td'$ a decision
 has to be made to continue moving in the same direction or stop. Let $v =
 \edg(u,d)$ be the destination node and $e = (u,v)$ the edge that is used for
 movement. Later we also need $u' = \edg(u,d+2)$\footnote{$d+2$ means the
 opposite direction from $d$}, which is the node before $u$ and $v' =
-\edg(v,d)$, which is the node after $v$. Also we need the set of node statuses
-where the moving component $w$ could came from.
+\edg(v,d)$, which is the node after $v$. It might be easier to look at an
+example on~\autoref{fig:upuvvp}.
+
+\begin{figure}[h]
+    \begin{center}
+        \input{fig/upuvvp}
+        \caption{Illustration for the meanings of $u',u,v,v'$. The arrows show
+        the direction $d$.}
+        \label{fig:upuvvp}
+    \end{center}
+\end{figure}
+
+Also we need the set of node statuses where the moving component $w$ could come
+from.
 \begin{align}
     \uw = \{w_m \mid w_m \in \Wm \wedge \getMC(w_m) = w\}
 \end{align}
 When $e \notin \E$ we skip the constraints, because we do not have movement
-variables for such a combination of starting vertex $u$ and direction $d$. Also
-when $t+\td' \notin \T$ we disable the start of movement, because it cannot
-continue.
+variables for such a combination of starting vertex $u$ and direction $d$. By
+skipping the constraints we mean that we do not add the remainder of the
+constraints in this section for current values of $(u,w,d,t)$ and we
+immediately go to next combination of $(u,w,d,t)$. Also when $t+\td' \notin \T$
+we disable the start of movement, because it cannot be finished.
 \begin{align}
+    \label{eq:gotime}
     &\IF{t+\td' \notin \T} &\go_{u,w,d,t} = 0
 \end{align}
 In addition to disabling go, we skip the rest of the constraints.
 
 As with other decisions the first group of constraints make sure that node
-status is correct at the time of the decision. In our case it has to be one of
+status is correct at the time of the decision. In this case it has to be one of
 the possible node statuses in $\uw$.
 \begin{align}
     & \go_{u,w,d,t} - \sum_{w_u \in \uw} \nstat_{u,w_u,t} \leq 0
 \end{align}
 If we have the edge $(u',u) \in \E$, that means that an already moving object
 could continue moving from $u'$ and is in other ways equivalent to a moving
-object, that start accelerating from $u$. So we define an abbreviation.
+object, that starts accelerating from $u$. So we define an abbreviation.
 \begin{align*}
     \goOrCont = \begin{cases}
         \go_{u,w,d,t} \IFc (u',u) \notin \E\\
         \go_{u,w,d,t} + \cont_{u',w,d,t} \IFc (u',u) \in \E
     \end{cases}
 \end{align*}
-and a constraint to make sure that those things do not happen at the same time.
+We also give a constraint to make sure that these things do not happen at the
+same time.
 \begin{align}
     \goOrCont \leq 1
 \end{align}
@@ -539,14 +608,14 @@ When there is movement, it has to be continued or stopped.
 Now again we have to check if movement can actually be completed. Earlier we
 checked if $t+\td' \notin \T$ and skipped the rest of the constraints. However
 now we check for $t+\td \not \T$. When that happens, we again disable the
-movement.
+movement like in constraint~\eqref{eq:gotime}.
 \begin{align}
     &\IF{t+\td' \notin \T} &\go_{u,w,d,t} = 0
 \end{align}
 And skip the rest of the constraints. At first this seems redundant, but we
 need to do it like this, because otherwise constraint~\eqref{eq:goImpcont} would
 not exist for $\cont$ and $\stp$ variables at the last timestep and no
-constraint would stop them form obtaining value 1.
+constraint would stop them from obtaining value 1.
 
 For the duration of movement the edge $e$ must be occupied and the node status
 should remain same. However from $w$, we do not know the actual status of $u$,
@@ -565,15 +634,15 @@ disable both the stop and continue at time $t$.
     &\IF{t < \td'} &\cont_{u,w,d,t} = 0\\
     &\IF{t < \td'} &\stp_{u,w,d,t} = 0
 \end{align}
-\TODO{Maybe a figure showing robots moving together.}
 Specifying node statuses for $u$ and $v$ after the movement would be simpler,
-if things could not move together. However robots can move side-by-side, at the
-same direction. For that reason we need to define additional set of node
-statuses. And corresponding variables. When the robot moves away from $u$,
-another thing can at the same time move into $u$. For that purpose, we define
-the set of statuses, that can move behind $w$ as $\B$. At the same time another
-moving object can disappear from $v$. Let $\A$ denote the set of things that
-can move ahead of $w$.
+if things could not move simultaneously side-by-side as
+on~\autoref{fig:simumove}. However robots can move side-by-side, at the same
+direction. For that reason we need to define additional set of node statuses
+and corresponding variables. When the robot moves away from $u$, another thing
+can at the same time come from~$u'$ into~$u$. For that purpose, we define the
+set of statuses, that can move behind~$w$ as $\B$. At the same time another
+moving object can disappear from~$v$ to~$v'$. Let $\A$ denote the set of things that
+can move ahead of~$w$.
 \begin{align}
     &\B = \begin{cases}
         \Wmc \IFc w = \stat{r}\\
@@ -585,19 +654,24 @@ can move ahead of $w$.
     \end{cases}
 \end{align}
 Now we construct the set of variables, which imply that some additional object
-is coming into $u$.
+is coming into $u$. Also now is the time to use the abbreviation $\contOrStop$,
+as a reminder it was defined as $\contOrStop_{u,w,d,t} = \cont_{u,w,d,t} +
+\stp_{u,w,d,t}$.
 \begin{align}
     \um = \begin{cases}
         0 \IFc (u',u) \notin \E\\
-        \sum_{w_{u'} \in \B} \cont_{u',w_{u'},d,t+\td'} +
-        \stp_{u',w_{u'},d,t+\td'} \IFc (u',u) \in \E
+        \sum_{w_{u'} \in \B} \contOrStop_{u',w_{u'},d,t+\td'} \IFc (u',u) \in
+        \E
     \end{cases}
 \end{align}
 Now we can give the general constraint, which says something about $u$ status
 at the end of movement. When $w$ moves away from $u$, it's status should be the
-beginning status minus the $w$, or something else must have come into $u$.
+beginning status minus the $w$, or something else must have come into $u$. To
+get the beginning status without $w$ we can use the helper function $\remMC$,
+which removes a moving component from node status.
 \begin{align}
-    \stp_{u,w,d,t+\td'} + \cont_{u,w,d,t+\td'} - \ul -\um \leq 0
+    \contOrStop_{u,w,d,t+\td'} -\sum_{w_u \in \uw}\nstat_{u,\remMC(w_u),t+\td}
+    -\um \leq 0
 \end{align}
 The last constraint was a general one, that did not exactly specify the status
 of $u$ after movement. To actually specify the status of $u$ after movement, we
@@ -607,50 +681,52 @@ be $\remMC(w_u)$\footnote{$w_u$ without the moveable component} or something
 else moved at the same time into $u$.
 \begin{align}
     \begin{split}
-        \forall w_u \in \uw\colon\quad &\stp_{u,w,d,t+\td'} + \cont_{u,w,d,t+\td'}
-        - \um\\ &+ \nstat{u,w_u,t+\td'} -\nstat_{u,\remMC(w_u),t+\td'} \leq 1
+        \forall w_u \in \uw\colon\quad \contOrStop_{u,w,d,t+\td'}
+        - \um &+ \nstat_{u,w_u,t+\td'}\\ &-\nstat_{u,\remMC(w_u),t+\td'} \leq 1
     \end{split}
 \end{align}
-When there is the edge $(u\,u) \in \E$ only then the following group of
+Only when there the edge $(u\,u)$ exists in $\E$, the following group of
 constraints is added. These make sure that if $w_b \in \B$ moved from $u'$ to $u$
 the new status of $u$ will be what would be left in $u$ plus the thing that
-moved in. There is one catch, what is left into $u$ is car and a robot carrying
-a car cannot come to $u$.
+moved in. 
 \begin{align}
     \begin{split}
+        \label{eq:addmove}
         \forall w_u \in \uw\colon &\forall w_b \in \B\colon \quad
         \cont_{u',w_b,d,t+\td'} + \stp_{u',w_b,d,t+\td'}\\
         &+\nstat_{u,w_u,t+\td'}
         -\nstat_{u,\addMC(\remMC(w_u), w_b),t+\td} \leq 1
     \end{split}
 \end{align}
+There are some subtle details hidden here: when the thing left in $u$ is a car
+and a robot carrying another car comes. In that case the function $\addMC$ is
+undefined, and the constraint~\eqref{eq:addmove} for that combination of~$w_u$ and~$w_b$ is not
+added.
 
 Now we want to say something about $v$ status at the end of movement. For that
-we use construct the set of statuses that are possible for $v$ after $w$ has
-moved into it. It turns out that the set is exactly $\uw$. Movement implies
+we use the set of statuses that are possible for $v$ after $w$ has moved into
+it. It turns out that the set is exactly $\uw$, which contained all the
+possible node status from where movement could originate from. Movement implies
 that at the end $v$ has one of statuses in $\uw$.
 \begin{align}
-    \begin{split}
-        \cont_{u,w,d,t+\td'} + \stp_{u,w,d,t+\td'} -\sum_{w_v \in \uw}
+        \contOrStop_{u,w,d,t+\td'} -\sum_{w_v \in \uw}
         \nstat_{v,w_v,t+\td} \leq 0
-    \end{split}
 \end{align}
 Similarly to $\um$ we construct the set of variables, which imply that something is
 moving away from $v$.
 \begin{align}
     \vl = \begin{cases}
         0 \IFc (v,v') \notin \E\\
-        \sum_{w_v \in \A} \cont_{v,w_v,d,t+\td'} +
-        \stp_{v,w_v,d,t+\td'} \IFc (v,v') \in \E
+        \sum_{w_v \in \A} \contOrStop_{v,w_v,d,t+\td'} \IFc (v,v') \in \E
     \end{cases}
 \end{align}
-Now we loop over all possible status that $v$ could have at the end of the
+Now we go over all possible status that $v$ could have at the end of the
 movement and specify the actual status. If the end status of $v$ is $w_v$ then
 status of $v$ was $\remMC(w_v)$ or something moved away from $v$.
 \begin{align}
     \begin{split}
         \forall w_v \in \uw\colon \quad
-        \cont_{u,w,d,t+\td'} + \stp_{u,w,d,t+\td'}
+        \contOrStop_{u,w,d,t+\td'}
         &-\nstat_{v,\remMC(w_v),t+\td'}\\
         &+\nstat_{v,w_v,t+\td} -\vl \leq 1
     \end{split}
@@ -712,83 +788,86 @@ Now we can finally give the constraints. The following constraints say that
 only one action from the set of node status changing actions can happen at
 once. There are two sets, because with simultaneous movement, it can happen
 that one action is for moving away and another for moving into~$u$.
-\todo{Write explanations}
 \begin{align}
-    \sum_{v \in \B} v \leq 1\\
-    \sum_{v \in \A} v \leq 1
+    \sum_{b \in \B} b \leq 1\\
+    \sum_{a \in \A} a \leq 1
 \end{align}
 When node status for~$u$ is~$w$, the node status has to remain same or some
 kind of action must have changed it.
 \begin{align}
-    \nstat_{u,w,t} - \nstat_{u,w,t+1} -\sum_{v \in \B} v -\sum_{v \in \A} v
+    \nstat_{u,w,t} - \nstat_{u,w,t+1} -\sum_{b \in \B} b -\sum_{a \in \A} a
     \leq 0
 \end{align}
 If node status in the future is~$w$ and something came into the node, another
-thing must have left the node.
+thing must have left the node~$u$.
 \begin{align}
-    \nstat_{u,w,t+1} +\sum_{v \in \B} v -\sum_{v \in \A} v
+    \nstat_{u,w,t+1} +\sum_{b \in \B} b -\sum_{a \in \A} a
     \leq 1
 \end{align}
 \subsubsection{Edge occupied constraints}
 These constrains are to make sure, that when no movement is using an edge the
 edge occupied variable will be 0. Constraints in this section are applied for
 all combinations of $e=(u,v) \in \E$ and $t \in \T$.
-Let $d$ denote the direction of edge $e$. First we collect all variables
+Let $d=\dir(e)$ denote the direction of edge $e$. First we collect all variables
 which imply that edge is occupied.
 \begin{align}
-    \A = \sum_{w \in \Wmc,\td \in \{0,\ldots,\getMT(d,w)\}, t+\td \in T}
-    \stp_{u,w,d,t+\td} + \cont_{u,w,d,t+\td}
+    \A = \{\cos_{u,w,d,t+\td'} \mid w \in \Wmc, \td' \in
+    \{0,\ldots,\getMT(d,w)-1\} \wedge t+\td' \in T\}
 \end{align}
-It is quite natural, that only of two of them can actually be 1. If we did not
-allow object to move together then only one of the variables could be 1. The
-reasoning is that at time $t$ an object moves away from $u$ but at the end of
-the movement ($t+\td-1$) another object which entered $u$ at time $t$ could
-also leave it.
-\todo{Bad explanation}
+At most two of movement
+variables in $\A$ can be 1. The reasoning is that at time $t$ an object moves
+away from $u$ but at the end of the movement ($t+\td'$) another object which
+entered $u$ at time $t$ could also leave it. This happens only when two robots
+are simultaneously moving side-by-side and continuing to move.
 \begin{align}
     \A \leq 2
 \end{align}
-We would want an equality constraint $\occu_{e,t} - \A = 0$ which would tell
-us that, edge is occupied when movement implied it, and movement occurs, when
-edge is occupied. However, $\A$ is not binary as $\occu_{e,t}$ and can also be
-2, therefore we need to simulate the equality constraint with two inequality
-constraints.
+We would want an equality constraint $\occu_{e,t} - \sum_{a \in \A} a = 0$
+which would tell us that, edge is occupied when movement implied it, and
+movement occurs, when edge is occupied. However, $\occu_{e,t}$ is a binary
+variable, but $\A$ is not and can also obtain value 2, therefore we need to
+simulate the equality constraint with two inequality constraints.
 \begin{align}
-    \occu_{e,t} - \A &\leq 0\\
-    2\occu_{e,t} - \A &\geq 0
+    \occu_{e,t} - \sum_{a \in \A}a &\leq 0\\
+    2\occu_{e,t} - \sum_{a \in \A}a &\geq 0
 \end{align}
 \subsection{Initial status and objective}
-Initial status will be fixed by adding constraints. Let the initial
-status of node $v$ be $v_i$, then we can add constraints to fix node status
-variables at the first timestep.
+\newcommand{\initW}[1]{\bar{#1}}
+\newcommand{\termW}[1]{\hat{#1}}
+Initial status will be fixed by adding constraints. Let the initial status of
+node $v$ be denoted by $\initW{v}$, then we can add constraints to fix node
+status variables at the first timestep.
 \begin{align}
-    &\forall v \in \V\colon &\nstat_{v,v_i,0} = 1
+    &\forall v \in \V\colon &\nstat_{v,\initW{v},0} = 1
 \end{align}
-Let $v_e$ denote the end status of node $v$. There are different ways to make
+Let $\termW{v}$ denote the end status of node $v$. There are different ways to make
 the model find a solution. One way is to add constraints for the last timestep.
 \begin{align}
-    &\forall v \in \V\colon &\nstat_{v,v_e,t_{\max}} = 1
+    &\forall v \in \V\colon &\nstat_{v,\termW{v},t_{\max}} = 1
 \end{align}
 We still have not defined the objective function to the model. We can
 define the objective function in a way that we do not need the constraints for
 the end status.
 \begin{align}
-    \min \sum_{v \in \V,t \in \T} -\nstat_{v,v_e,t}
+    \min \sum_{v \in \V,t \in \T} -\nstat_{v,\termW{v},t}
 \end{align}
-This objective means that for every node~$v$, we want the status be~$v_e$ for
-as long as possible or in other words, as soon as possible.
+This objective means that for every node~$v$, we want the status be~$\termW{v}$
+for as long as possible or in other words, as soon as possible.
 
 Other possible objective functions can be considered. Maybe it does not make
 sense to add all node statuses to objective. If we ignore the empty nodes, we
 can decrease the number of variables in the objective.
 \begin{align}
     \label{eq:timeobj}
-    \min \sum_{v \in \V,t \in \T,v_e \neq \stat{e}} -\nstat_{v,v_e,t}
+    \min \sum_{v \in \V,t \in \T,\termW{v} \neq \stat{e}}
+    -\nstat_{v,\termW{v},t}
 \end{align}
+However this is objective does not actually minimize the time needed to move
+everything to final positions. A robot might go to its destination instead of
+first moving the car, because that might get a better objective. An example can
+be found at~\autoref{apx:movement}.
 \TODO{Show an example why this is bad - rnd-03x03-a, with 30 timesteps}
 
-\TODO{think this over, maybe give on concrete objective here, and discuss about
-others somewhere else.}
 Sometimes the optimal solution consist of one robot waiting for other to move
 out of way. Instead of standing still, the waiting robot moves back and forth.
 This is undesired behaviour of the model, because it wastes energy. Therefore
@@ -797,19 +876,39 @@ and then minimize energy used.
 \begin{align}
     \begin{split}
         \label{eq:energyobj}
-        \min \sum_{v \in \V,w \in \Wmc,t \in \T,d \in \D, (v,\edg(v,d)) \in \E}
-        &C_{1,w} \go_{v,w,d,t} + C_{2,w} \cont_{v,w,d,t} + C_{3,w} \stp_{v,w,d,t}\\
+        \min \sum_{e=(u,v) \in \E,w \in \Wmc,t \in \T}
+        &C_{1,w} \go_{u,w,\dir(e),t} + C_{2,w} \cont_{u,w,\dir(e),t} + C_{3,w}
+        \stp_{u,w,\dir(e),t}\\
         +\sum_{v \in \V, w \in \Wl,t \in \T} &D_{1,w} \lift_{v,w,t}
         +\sum_{v \in \V, w \in \Wd,t \in \T} D_{2,w} \drop_{v,w,t}
     \end{split}
 \end{align}
-\TODO{do we want something like that?}
 Here $C$ is $(3 \times |\Wmc|)$-dimensional matrix that contains the amount of
-energy used by the movement.
-This would give optimal solutions energy-wise,
-but we are more concerned about time. Minimizing the energy in the case when
-there are multiple robots, would lead to only one robot working at the same
-time, because working in parallel might take more energy. Therefore a combination of
-both~\eqref{eq:energyobj} and \eqref{eq:timeobj} would be the better.
+energy used by the movement. For lifting and dropping we have a similar matrix
+$D$. That way we can give different costs to different to every action and even
+to every labeled car. This would give optimal solutions energy-wise,
+but we are more concerned about time.
+
+Therefore, a combination of both~\eqref{eq:energyobj} and \eqref{eq:timeobj}
+might be the better. After testing such a combination, it turned out that the
+problem of robot moving to destination before doing any work was still the
+case, however it removed the problem of robots doing unnecessary
+actions instead of waiting.
+
+The next objective function was to minimize energy, but actions at later
+timesteps would cost more. And also give a penalty if at $t_{\max}$, the node
+status is different from terminal state~$\termW{v}$. Let $g(t) = 1 +
+\frac{t}{t_{\max}}$.
+\begin{align}
+    \begin{split}
+        \min \sum_{(u,v) \in \E,w \in \Wmc,t \in \T,d=\dir((u,v))}(0.2 g(t) \cdot
+        \go_{u,w,d,t} + 0.1 g(t) \cdot \cont_{u,w,d,t}\\ + 0.2 g(t)
+        \cdot \stp_{u,w,d,t})
+        +\sum_{v \in \V, w \in \Wl,t \in \T} 0.4 g(t) \cdot \lift_{v,w,t}\\
+        +\sum_{v \in \V, w \in \Wd,t \in \T} 0.1 g(t) \cdot \drop_{v,w,t}\\
+        +\sum_{v \in \V, w \in \Wd, w \neq \termW{v}} 10 \cdot
+        \nstat_{v,w,t_{\max}}
+    \end{split}
+\end{align}
 
 \subsection{Size of the model}

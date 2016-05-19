@@ -1,0 +1,13 @@
+\newgeometry{left=1cm,right=1cm,top=1cm,bottom=1cm}
+\section{Example of movement}
+\label{apx:movement}
+\TODO{figure out good way to do this}
+
+\def \examplescale {6cm}
+\newcommand{\example}[1]{
+    \includegraphics[width=\examplescale]{fig/app/ex#1.png}
+    \includegraphics[width=\examplescale]{fig/app/bad#1.png}
+}
+
+%\foreach \n in {0,...,26}{\example{\n}}
+\restoregeometry
