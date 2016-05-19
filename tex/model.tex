@@ -9,11 +9,13 @@ Now we define some subsets of node statuses. We start with~$\Wl$, a set of
 statuses where robot is under a car and decision to lift it can be made. Second
 is almost the opposite set~$\Wd$, which containts all the statuses, where robot
 is carrying a car and decision to drop it can be made. Third set is~$\Wm$ and
-it consists of statuses, that correspond to moving components. A robot can
-move and a robot carrying a car can move.
+it consists of node statuses that contain something, that can move. The last
+set is~$\Wmc$ that correspond to moving components. A robot can move and a
+robot carrying a car can move.
 \begin{align}
     \Wl &= \{\stat{ri} \mid i \in \{0,\ldots,K-1\}\}\\
     \Wd &= \{\stat{ir} \mid i \in \{0,\ldots,K-1\}\}\\
+    \Wm &= \Wl \cup \Wd \cup \{\stat{r}\}\\
     \Wmc &= \Wd \cup \{\stat{r}\}
 \end{align}
 
@@ -901,6 +903,7 @@ status is different from terminal state~$\termW{v}$. Let $g(t) = 1 +
 \frac{t}{t_{\max}}$.
 \begin{align}
     \begin{split}
+        \label{eq:objective}
         \min \sum_{(u,v) \in \E,w \in \Wmc,t \in \T,d=\dir((u,v))}(0.2 g(t) \cdot
         \go_{u,w,d,t} + 0.1 g(t) \cdot \cont_{u,w,d,t}\\ + 0.2 g(t)
         \cdot \stp_{u,w,d,t})
@@ -911,4 +914,88 @@ status is different from terminal state~$\termW{v}$. Let $g(t) = 1 +
     \end{split}
 \end{align}
 
+In the end we used objective function~\eqref{eq:objective} with a small
+modification to only give penalties to those node statuses, where the terminal
+status contains a labeled car.
+
 \subsection{Size of the model}
+It is customary to give the total number of variables, equalities and
+inequalities for a integer programming model. In our case these numbers are
+dependant of the exact graph~$\mathcal{G}=(\V,\E)$, number of different labels for
+cars~$K$, and the number of timesteps~$t_{\max}$. Because $|\T| = \tm + 1$, we
+use $|\T|$ in further calculations. We use abbreviations $T = |\T|, V
+= |\V|$ and $E = |\E|$.
+
+We first give the sizes of $\W, \Wl, \Wd, \Wm$ and $\Wmc$.
+\begin{align}
+    |\W| &= 4 + 3K\\
+    |\Wl| &= K\\
+    |\Wd| &= K\\
+    |\Wm| &= 1 + 2K\\
+    |\Wmc| &= 1 + K
+\end{align}
+\subsubsection{Number of variables}
+\label{sec:numv}
+We start with node status variables.
+\begin{align}
+    VWT = V(4 + 3K)T = TV(3K + 4)
+\end{align}
+The number of edge variables is $ET$.
+The number of decision variables is:
+\begin{align}
+    \begin{split}
+        3E\Wmc\T &+ V|\Wl|T + V|\Wd|T\\
+        &= T(3E|\Wmc| + V(|\Wl| + |\Wd|))\\
+        &= T(3E(1+K) + 2VK)
+    \end{split}
+\end{align}
+Total number of variables is:
+\begin{align}
+    \begin{split}
+        TV(3K+4) &+ ET + T(3E(1+K) + 2VK)\\
+        &= T(V(3K+4) + E + 3E(1+K) + 2VK)\\
+        &= T(5VK + 3EK + 4V +4E)
+    \end{split}
+\end{align}
+\subsubsection{Number of equalities}
+We have only two groups of real equality constraints. The others are meant to
+fix a value of a variable, and therefore we do not count them here. Although
+those variables will be fixed by equality constraints, We still counted them
+in~\autoref{sec:numv}.
+Total number of equality constraints is $TV + TE(1+K)= T(EK + E + V)$.
+\subsubsection{Number of inequalities}
+There are lots of inequalities so we will not give an exact number, but an
+upper bound.
+From simple constraint and lifting constraints the number of inequalities is:
+\begin{align}
+    \begin{split}
+        TE + TV + 4TV &+ TV + TVK + 5TVK + TVK + TVK + TVK + TVK\\
+        &=10TVK + 6TV + TE
+    \end{split}
+\end{align}
+
+From moving constraints we get the following upper bound on number of
+inequalities:
+\begin{align}
+    \begin{split}
+        TE(1+K)(1 + 1 &+ 5 + 5K + 1 + K + K^2 + 1 + K)\\
+        &=TE(1+K)(K^2 + 7K + 9)
+    \end{split}
+\end{align}
+
+For node status constraints the upper bound on inequalities is:
+\begin{align}
+    TV(4+3K)(1 + 1 + 1 + 1) = 12TVK + 16TV
+\end{align}
+For edge occupied constraint the upper bound is: $TE(1+1+1) = 3TE$.
+
+In total the upper bound of inequalities is:
+\begin{align}
+    \begin{split}
+        10TVK &+ 6TV + TE + TE(1+K)(K^2 + 7K + 9) + 12TVK + 16TV + 3TE\\
+        &= 22TVK + 22TV + 4TE + (TE + TEK)(K^2 + 7K + 9)\\
+        &= 22TVK + 22TV + 4TE + TEK^2 + 7TEK + 9TE + TEK^3 + 7TEK^2 + 9TEK\\
+        &= TEK^3 + 8TEK^2 + 22TVK + 16TEK + 22TV + 13TE\\
+        &= T(EK^3 + 8EK^2 + 22VK + 16EK + 22V + 13E)
+    \end{split}
+\end{align}
