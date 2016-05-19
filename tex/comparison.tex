@@ -1,8 +1,31 @@
 \section{Comparison}
 There was an alternative integer programming model developed for exact same
 problem, using the same simplifications and assumptions described
-in~\autoref{sec:discrete problem}.
+in~\autoref{sec:discrete problem}. The alternative model has a lots of more
+variables. With more variables it is possible use simpler constraints, which
+contain variables from non consecutive timesteps. To be more precise,
+constraints only use the variables from the current timestep $t$ and from the
+next timestep $t+1$.
 
+The objective function for alternative model is a mix between progressive
+energy minimization like~\eqref{eq:objective} and minimizing the time when node
+statuses different. I guess there could be some problems similar to the problem
+depicted in~\autoref{apx:movement}. Terminal state is fixed with a large cost,
+when it differs in the last timestep. The objective function only considers the
+location of cars and not the robots just like the model described
+in~\autoref{sec:model}.
+
+\subsection{Problem instances used for comparison}
+The underlying grid layout was taken from a real car park. Initial and terminal
+configurations were randomly generated.
+
+\subsection{Testing platform}
+The testing was done a machine with Intel(R) Core(TM) i7-4790K CPU.  The
+machine has 16GB of operating memory. With hyper-threading the number of
+virtual CPUs available was 8. However, the solvers were instructed to use only
+thread, because several instances were run in parallel.
+
+\subsection{Results}
 \begin{table}[h]
     \begin{center}
         \begin{tabular}{|c|c|c|c|c|c|c|}

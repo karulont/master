@@ -1,12 +1,12 @@
 \section{Introduction}
 It does not take a scientific paper to see that the number of cars on our
 streets has increased. This creates a need for more parking places. It is
-common for shopping centers and other public places with lots of quests to have
+common for shopping centers and other public places with lots of guests to have
 large parking lots or even parking houses. However, finding a parking space
 still is a frustrating experience for the drivers. Some fancy places have valet
 parking. Valet parking is rare in Estonia, but it is quite common in North
 America. Valet parking means that the driver does not have to self-park and a
-valet will park their car.
+valet will park and retrieve their car when requested.
 
 Since the industrial revolution when a lot of manufacturing by hand was replaced
 by automation, other manual tasks are handed over to machines. One of those
@@ -30,6 +30,12 @@ It is important that the time taken to retrieve cars is minimized, otherwise
 drivers feel like they are wasting their time, waiting for their car. In a car
 park without passageways, the parking robots have to be cooperative and cannot
 do path planning as independent agents like in~\cite{wurman2008coordinating}.
+There are car parks with different layouts, some have large areas connected by
+narrow corridors, which would break algorithms that work on a rectangular grid.
+Algorithms specially designed for a park layout or even car parks built to
+match the specifics of an algorithm are operational, but they need lot of work
+and generally more expensive. We want to test if a general purpose tool like
+integer programming can solve the problem.
 
 There are a lot of optimization problems in a automated parking system
 described. We chose to tackle a sub-problem: given a initial configuration of
@@ -39,11 +45,9 @@ terminal configuration. Note that best in this case means mostly shortest time,
 but we might also want to avoid unneeded actions because they waste energy and
 moving parts wear.
 
-\TODO{write about other approaches}
-
-We chose to specify the problem as an integer programming model optimization
-problem. Unlike approximation algorithms, integer programming will give us a
-strong guarantee that the solution found is in fact optimal.
+The goal of this thesis was to model the problem as an integer programming
+model optimization problem. Unlike heuristic algorithms, integer programming
+will give us a strong guarantee that the solution found is in fact optimal.
 
 \subsection{More specific problem description}
 The parking robot can move either forwards, backwards or sideways. The length of
@@ -53,16 +57,20 @@ lowering it will take 3 seconds. The speed of the robot is 2 meters per second,
 when not carrying a car, and 1 meter per second, when loaded. Robots needs time
 to accelerate and de-accelerate. Changing the direction takes 3 seconds.
 
-The last paragraph describes the information we received. However there is still
-some room to interpret the acceleration of the robot. It is said that changing
-direction takes 3 seconds. The interpretation we used, is that it takes 1.5
-seconds to stop a robot moving at it's maximum speed. And another 1.5 seconds to
-accelerate it to maximum speed in another direction. Maximum speed depends on
-whether the robot is carrying a car or not, however it makes sense that the
-acceleration of robot can be greater, when the mass is lower. Meaning that a
-heavy loaded robot can accelerate to speed 1 meter per second and that the empty
-robot can accelerate to speed 2 meters per second in the same time. It might
-help to see~\autoref{fig:changedir}.
+The previous paragraph describes the estimated times which were to be used as
+basis for building the model. In the reality they might be different, but this
+is an idealized model, because the actual robots are not yet built after all.
+
+However there is still some room to interpret the acceleration of the robot. It
+is said that changing direction takes 3 seconds. The interpretation we used, is
+that it takes 1.5 seconds to stop a robot moving at it's maximum speed. And
+another 1.5 seconds to accelerate it to maximum speed in another direction.
+Maximum speed depends on whether the robot is carrying a car or not.
+According to Newton's second law of motion: acceleration of robot can be
+greater, when the mass is lower. Meaning that a heavy loaded robot can
+accelerate to speed 1 meter per second and that the empty robot can accelerate
+to speed 2 meters per second in the same time. It might help to
+see~\autoref{fig:changedir}.
 
 \begin{figure}[h]
     \begin{center}
@@ -98,7 +106,7 @@ dimensions of the parking space.
 \end{figure}
 
 When a robot decides to move many spaces in one direction the distance traveled
-is equal to distance traveled: while accelerating, while de-accelerating and
+is equal to the distances covered while accelerating, while de-accelerating and
 while moving with full speed. For an empty robot the distance traveled while
 accelerating and de-accelerating sums to 3 meters. For each additional parking
 place traveled we need 1.5 seconds for $\De$ or $\Dw$ direction. For $\Dn$ or
@@ -111,7 +119,7 @@ space traveled. For the longer dimension, we need additional 4.5 seconds, and
 for each additional space we need to add 6 seconds to reach the desired
 distance.
 
-As an example, lets consider that a loaded robot want to move 3
+As an example, let us consider that a loaded robot wants to move 3
 parking spaces in the direction $\Dn$. The total distance needed to cover is
 $3\times 6 = 18$ meters. The time it takes is $3 + 4.5 + 2 \times 6 = 19.5s$
 seconds. Lets verify that the distance is right: for 3 second we are
@@ -162,11 +170,14 @@ And every movements ends up in the exact center of the parking place.
 
 For the car park, we use graph $\mathcal{G} = (\V,\E)$, where every vertex is a
 parking space and every edge $(u,v)$ means that there is no obstacle between
-parking spaces~$u$ and~$v$. The parking places can be at most 4-way-connected,
-with the connections corresponding to directions in $\D$.
+parking spaces~$u$ and~$v$. The parking places have degree at most 4,
+with the edges corresponding to directions in $\D$.
 
-We let $K$ be the number of different labels we want to give to cars. We do not
-give robots labels, because for our simplification, they are indistinguishable.
+We let $K$ be the number of different labels we want to give to cars. Cars with
+the same label are indistinguishable in our model. Usually there are a lot of
+dormant cars and only the cars that have just arrived or requested need to be
+given distinctive labels. We do not give robots labels, because for our
+simplification, they are indistinguishable.
 
 The problem is to find a suitable sequence of actions for robots, to
 reconfigure the given initial configuration into the terminal configuration.
