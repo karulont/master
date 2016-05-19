@@ -1,13 +1,12 @@
 \section{Integer programming model}
 \label{sec:model}
-\TODO{Write introduction to the model}
 We will use the definitions $\V$ and $\E$ from page~\pageref{eq:graph} and
 definition of $\D$ from page~\pageref{eq:dir} quite extensively in this
 section. Every parking space has a status. All possible node statuses are
 described in~\autoref{tbl:statuses}. We denote the set of all node statuses
 as~$\W$.
 
-\begin{table}
+\begin{table}[h]
     \begin{center}
         \begin{tabular}{| c | c |}
             \hline
@@ -23,7 +22,6 @@ as~$\W$.
             \stat{drp} & There is a robot in the process of dropping a car.\\
             \hline
         \end{tabular}
-        \TODO{make this table nice}
         \caption{We list all possible statuses of parking spaces with their
             descriptions. Note that $\stat{i} \in \{0,\ldots,K-1\}$. So when
             there is a robot carrying car with label 2, the status should be
@@ -68,7 +66,6 @@ robot carrying a car can move.
     \Wmc &= \Wd \cup \{\stat{r}\}
 \end{align}
 
-\TODO{Explanation of movement}
 De-accelerating a moving robot takes 1 timestep. Therefore, the decision to continue
 moving in the same direction or to stop has to be made 1 timestep before
 arriving at an adjacent node. Since we change the node statuses only when we
@@ -186,8 +183,7 @@ for testing the model during development.
 
 Testing was needed to avoid typos like writing $v$ or even $u$ instead of $v'$.
 Also there were some occurrences, where we made wrong assumptions, because there
-are so many cases to consider for a simple action.\todo{Write something more
-meaningful here.}
+are so many cases to consider for a simple action.
 
 Some of these illustrations or tests are meant to be infeasible. Others have
 expected outcomes, which are automatically verified . When an specific
@@ -592,7 +588,7 @@ the model, disable the decision.
 While constructing movement constraints, we need some abbreviations and cannot
 write all the quantifiers before every constraint. Therefore, the constraints
 in this section are for all combinations of $u \in \V$, $w \in \Wmc$, $d \in
-\D$ and $t \in \T$. \TODO{Fix this paragraph}
+\D$ and $t \in \T$.
 
 Now let $\td = \getMT(w,d)$, and $\td' = \td-1$. When movement starts at time $t$,
 the node status will change at time $t+\td$, and at time $t+\td'$ a decision
@@ -903,6 +899,7 @@ We still have not defined the objective function to the model. We can
 define the objective function in a way that we do not need the constraints for
 the end status.
 \begin{align}
+    \label{eq:objtime}
     \min \sum_{v \in \V,t \in \T} -\nstat_{v,\termW{v},t}
 \end{align}
 This objective means that for every node~$v$, we want the status be~$\termW{v}$
