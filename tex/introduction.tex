@@ -81,7 +81,7 @@ see~\autoref{fig:changedir}.
 \end{figure}
 
 It is assumed that car park is a grid of of parking spaces. We define a set of
-directions as $\D = \{\Dn, \De, \Ds, \Dw\}$. A parking place in the $\Dn$ -
+directions as $\label{eq:dir}\D = \{\Dn, \De, \Ds, \Dw\}$. A parking place in the $\Dn$ -
 $\Ds$ dimension is 6 meters long, and in the $\De$ - $\Dw$ dimension is 3
 meters wide. Note that the directions defined here do not have to correspond to
 geographical directions.
@@ -162,7 +162,7 @@ on~\autoref{fig:manyspaces}.
 From the~\autoref{tbl:times}, it can be seen that all the times are multiples
 of 1.5 seconds. That means we can take 1.5 seconds as a our timestep. All the movements take a discrete number of timesteps and every movement ends up in the exact center of the parking place.
 
-For the car park, we use graph $\mathcal{G} = (\V,\E)$, where every vertex is a
+For the car park, we use graph $\label{eq:graph}\mathcal{G} = (\V,\E)$, where every vertex is a
 parking space and every edge $(u,v)$ means that there is no obstacle between
 parking spaces~$u$ and~$v$. The parking places have degree at most 4,
 with the edges corresponding to directions in $\D$.
@@ -195,7 +195,7 @@ see~\autoref{fig:unsolvable}.
 \subsubsection{Possible further simplifications}
 \todo{absolutely not sure about this section}
 From theoretical viewpoint, there is a interesting and relevant result
-in~\cite{calinescu2008reconfigurations}. For this thought experiment, we further
+in~\cite{calinescu2008reconfigurations}. For this abstraction, we further
 simplify our problem, and also forget about robots and the moving times. We
 just have a graph $\mathcal{G}$, initial configuration of cars, and terminal
 configuration of cars. Cars can move from one node~$u$ to another node~$v$ in
@@ -215,5 +215,5 @@ But in general a user expects to receive their car. Therefore we still
 have to keep cars labeled. 
 
 According to theorem 3 from~\cite{calinescu2008reconfigurations}, with labeled
-cars on a graph, the reconfiguration problem is APX-hard. That means that there
-is no polynomial-time approximation scheme for the problem.
+cars on a graph, the reconfiguration problem is APX-hard. If $P\neq NP$, this
+implies that there is no polynomial-time approximation scheme for the problem.

@@ -1,10 +1,11 @@
 \section{Integer programming model}
 \label{sec:model}
 \TODO{Write introduction to the model}
-\TODO{Should I repeat things mentioned in the introduction? ($\V,\E,\W)$ (sets and
-iterators)}
-Every parking space has status. All possible node statuses are described
-in~\autoref{tbl:statuses}. We denote the set of all node statuses as~$\W$.
+We will use the definitions $\V$ and $\E$ from page~\pageref{eq:graph} and
+definition of $\D$ from page~\pageref{eq:dir} quite extensively in this
+section. Every parking space has a status. All possible node statuses are
+described in~\autoref{tbl:statuses}. We denote the set of all node statuses
+as~$\W$.
 
 \begin{table}
     \begin{center}
@@ -53,9 +54,9 @@ see~\autoref{fig:movingstatus}.
 We have to fix the number of timesteps that the model has. We use $\T =
 \{0,\ldots,t_{\max}\}$ to denote the set of all timesteps in the model.
 
-Now we define some subsets of node statuses. We start with~$\Wl$, a set of
+Now we define some subsets of node statuses. We start with~$\Wl$, the set of
 statuses where robot is under a car and decision to lift it can be made. Second
-is almost the opposite set~$\Wd$, which containts all the statuses, where robot
+is almost the opposite set~$\Wd$, which contains all the statuses, where robot
 is carrying a car and decision to drop it can be made. Third set is~$\Wm$ and
 it consists of node statuses that contain something, that can move. The last
 set is~$\Wmc$ that correspond to moving components. A robot can move and a
@@ -70,18 +71,17 @@ robot carrying a car can move.
 \TODO{Explanation of movement}
 De-accelerating a moving robot takes 1 timestep. Therefore, the decision to continue
 moving in the same direction or to stop has to be made 1 timestep before
-arriving at and adjacent node. Since we change the node statuses only when we
+arriving at an adjacent node. Since we change the node statuses only when we
 arrive at the center of parking place as illustrated
 on~\autoref{fig:movingstatus}, the decisions to continue or stop moving are
 also made on the same node. The object has not yet arrived at the other node,
-so it does not make sense to tie decision with the destination node.
+so it does not make sense to tie decision to the destination node.
 
-\begin{lemma}
+\begin{proposition}
     All feasible solutions to the integer programming model correspond to feasible
     actions of robots and all feasible actions of the robots correspond to
     feasible solutions to the integer programming model.
-    \TODO{find good way to write this}
-\end{lemma}
+\end{proposition}
 \begin{proof}
     This will become clear from the explanations of variables
     in~\autoref{sec:variables} and explanations of constraints
@@ -93,7 +93,7 @@ The variables for the model are all binary, meaning their allowed values are fro
 $\{0,1\}$. There are three groups of variables:
 \begin{enumerate}
     \item node status variables,
-    \item edge occupied variables,
+    \item edge-occupied variables,
     \item decision variables.
 \end{enumerate}
 For every timestep, there is another layer of the variables. Meaning that if
@@ -111,7 +111,7 @@ more accurate, the group of node status variables is defined as following.
     \nstat_{v,w,t}
 \end{align}
 
-\subsubsection{Edge occupied variables}
+\subsubsection{Edge-occupied variables}
 There are variables for each directed edge between parking spots. When a robot
 moves from vertex $u$ to vertex $v$ at timestep $t$, the edge variable
 $\occu_{(u,v),t}$ is 1 to indicate that the edge is occupied. All edge variables
@@ -429,7 +429,6 @@ do not stop at intermediate nodes.
 In this section we give the constraints of the integer programming model. Some
 of these constraints are redundant, but they might help the solver and they
 also provide a meaningful bound for some abbreviations.
-\todo{Check this}
 \subsubsection{Helper functions and some notations}
 \label{sec:helpers}
 The first helper function used is $\edg \colon \V \times \D \to \V$. Let
@@ -456,7 +455,6 @@ Depending on the direction and whether the robot is carrying a car, the
 movement takes different number of timesteps. For this, we introduce a new
 function $\getMT \colon \Wmc \times \D \to \mathbb{N}$. Function $\getMT(w,d)$
 returns the number of timesteps the movement of $w$ takes in direction $d$.
-\TODO{Add more meaningful stuff here}
 
 For working with node statuses related to moving there is a notion of moving
 component, which is the status, that can move. First is when node status
