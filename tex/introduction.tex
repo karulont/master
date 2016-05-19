@@ -5,49 +5,48 @@ common for shopping centers and other public places with lots of guests to have
 large parking lots or even parking houses. However, finding a parking space
 still is a frustrating experience for the drivers. Some fancy places have valet
 parking. Valet parking is rare in Estonia, but it is quite common in North
-America. Valet parking means that the driver does not have to self-park and a
+America. Valet parking means that the driver hand the car over to a valet and a
 valet will park and retrieve their car when requested.
 
-Since the industrial revolution when a lot of manufacturing by hand was replaced
-by automation, other manual tasks are handed over to machines. One of those
-tasks is valet parking. Instead of a human valet, there is a parking robot that
+One way to further optimize the parking problem - save time and require less 
+parking space - is to use automated valet parking.
+Instead of a human valet, there is a parking robot that
 carries your car to a free parking space. In the system explored in this
 thesis, drivers will stop their cars on a special platform. A parking robot can
 freely move under those platforms and also can lift the platform up from the
-ground and carry it to another place with the drivers car still on the
-platform. For a driver the experience should be very similar to regular valet
-parking: driver stops near the door and does not need to worry about parking,
-after visiting the venue the driver can notify the system and will have their
-car brought back to them.
+ground and carry it with the car. For a driver the experience should be very 
+similar to regular valet parking: driver stops near the door and does not need to worry about parking,
+after visiting the venue the driver can notify the system will bring the
+car back to them.
 \subsection{The problem}
-In an automated valet parking system, the software has to choose which of
-possibly many parking robots will service the incoming parking or car retrieval
-request, it will also need to figure out a path for the robots. Regular car
-parks have passageways, so that no car is parked in a way that would block
-other cars from entering or exiting. In an automated system we do not need
-passageways, because blocking cars can be lifted and moved out of the way.
+In an automated valet parking system, the software dictates which parking robot 
+will service the incoming parking or car retrieval request, it will also need 
+to do path-planning for the robots. 
+Regular car parks have passageways, so that no car is parked in a way that would block
+other cars from entering or exiting. In such automated system we can park cars
+more densly, because blocking cars can be lifted and moved out of the way.
 It is important that the time taken to retrieve cars is minimized, otherwise
-drivers feel like they are wasting their time, waiting for their car. In a car
-park without passageways, the parking robots have to be cooperative and cannot
-do path planning as independent agents like in~\cite{wurman2008coordinating}.
-There are car parks with different layouts, some have large areas connected by
-narrow corridors, which would break algorithms that work on a rectangular grid.
-Algorithms specially designed for a park layout or even car parks built to
-match the specifics of an algorithm are operational, but they need lot of work
-and generally more expensive. We want to test if a general purpose tool like
-integer programming can solve the problem.
+drivers time is wasted waiting. In a car park without passageways, the parking 
+robots have to be cooperative and cannot do path planning as independent agents 
+like in~\cite{wurman2008coordinating}. There are car parks with different layouts, 
+some have large areas connected by narrow corridors, which would break algorithms 
+that work on a rectangular grid. Algorithms specially designed for a park layout 
+or even car parks built to match the specifics of an algorithm are operational, 
+but they need lot of work and generally more expensive. We want to test if a 
+general purpose tool like integer programming can be used to optimize automated 
+valet parking operations.
 
-There are a lot of optimization problems in a automated parking system
+There are a lot of different optimization problems in a automated parking system
 described. We chose to tackle a sub-problem: given a initial configuration of
 robots and cars in the system and a terminal configuration, find the best
 sequence of actions for robots to transform the initial configuration into the
 terminal configuration. Note that best in this case means mostly shortest time,
-but we might also want to avoid unneeded actions because they waste energy and
-moving parts wear.
+but we might also want to give some optimization weights for different actions because 
+they waste energy and moving parts wear.
 
 The goal of this thesis was to model the problem as an integer programming
 model optimization problem. Unlike heuristic algorithms, integer programming
-will give us a strong guarantee that the solution found is in fact optimal.
+can give us a strong guarantee that the solution found is in fact optimal.
 
 \subsection{More specific problem description}
 The parking robot can move either forwards, backwards or sideways. The length of
@@ -61,15 +60,13 @@ The previous paragraph describes the estimated times which were to be used as
 basis for building the model. In the reality they might be different, but this
 is an idealized model, because the actual robots are not yet built after all.
 
-However there is still some room to interpret the acceleration of the robot. It
-is said that changing direction takes 3 seconds. The interpretation we used, is
+It is perfectly valid to interpret the time required for stopping and reversing as acceleration. 
+It is said that changing direction takes 3 seconds. The interpretation we used, is
 that it takes 1.5 seconds to stop a robot moving at it's maximum speed. And
 another 1.5 seconds to accelerate it to maximum speed in another direction.
-Maximum speed depends on whether the robot is carrying a car or not.
-According to Newton's second law of motion: acceleration of robot can be
-greater, when the mass is lower. Meaning that a heavy loaded robot can
-accelerate to speed 1 meter per second and that the empty robot can accelerate
-to speed 2 meters per second in the same time. It might help to
+Maximum speed and acceleration depends on whether the robot is carrying a car or not.
+Aaccording to Newton's Second Law, acceleration of robot can be greater when the mass is lower. Meaning that, in this case, a heavy loaded robot can
+accelerate at half the rate as unladen one. It might help to
 see~\autoref{fig:changedir}.
 
 \begin{figure}[h]
@@ -122,7 +119,7 @@ distance.
 As an example, let us consider that a loaded robot wants to move 3
 parking spaces in the direction $\Dn$. The total distance needed to cover is
 $3\times 6 = 18$ meters. The time it takes is $3 + 4.5 + 2 \times 6 = 19.5s$
-seconds. Lets verify that the distance is right: for 3 second we are
+seconds. Lets verify that the distance is right: for 3 seconds we are
 accelerating and de-accelerating, with top speed 1 $\frac{m}{s}$, the average
 speed being 0.5 $\frac{m}{s}$. Other time we are moving with top speed which is 1
 $\frac{m}{s}$. The distance traveled will be $3 * 0.5 + 4.5 \times 1 + 2(6
@@ -160,13 +157,10 @@ on~\autoref{fig:manyspaces}.
         \label{tbl:times}
     \end{center}
 \end{table}
-\subsection{Simplified discrete problem}
+\subsection{Formulation as a discrete problem}
 \label{sec:discrete problem}
 From the~\autoref{tbl:times}, it can be seen that all the times are multiples
-of 1.5 seconds. So we can ignore the actual speeds and dimensions. We can just
-use multiplies of 1.5 seconds, which we will call timesteps. One timestep is
-equal to 1.5 seconds. All the movements take a discrete number of timesteps.
-And every movements ends up in the exact center of the parking place.
+of 1.5 seconds. That means we can take 1.5 seconds as a our timestep. All the movements take a discrete number of timesteps and every movement ends up in the exact center of the parking place.
 
 For the car park, we use graph $\mathcal{G} = (\V,\E)$, where every vertex is a
 parking space and every edge $(u,v)$ means that there is no obstacle between
@@ -176,8 +170,7 @@ with the edges corresponding to directions in $\D$.
 We let $K$ be the number of different labels we want to give to cars. Cars with
 the same label are indistinguishable in our model. Usually there are a lot of
 dormant cars and only the cars that have just arrived or requested need to be
-given distinctive labels. We do not give robots labels, because for our
-simplification, they are indistinguishable.
+given distinctive labels. We do not label robots as they are interchangeable.
 
 The problem is to find a suitable sequence of actions for robots, to
 reconfigure the given initial configuration into the terminal configuration.
@@ -199,7 +192,7 @@ see~\autoref{fig:unsolvable}.
     \end{center}
 \end{figure}
 
-\subsubsection{Oversimplified problem}
+\subsubsection{Possible further simplifications}
 \todo{absolutely not sure about this section}
 From theoretical viewpoint, there is a interesting and relevant result
 in~\cite{calinescu2008reconfigurations}. For this thought experiment, we further
@@ -218,8 +211,8 @@ time algorithm for finding the optimal moves. However, that applies to only
 unlabeled cars.
 
 Maybe there are large firms, where everyone can just ride a random company car.
-But in general a user expects to receive their regular car. Therefore we still
-have to keep labels on cars. 
+But in general a user expects to receive their car. Therefore we still
+have to keep cars labeled. 
 
 According to theorem 3 from~\cite{calinescu2008reconfigurations}, with labeled
 cars on a graph, the reconfiguration problem is APX-hard. That means that there
