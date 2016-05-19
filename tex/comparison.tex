@@ -32,7 +32,9 @@ Both models were run against Several problem instances. Each instance was run 3
 times by each model. Number of timesteps for each problem instance was made to
 be small, but hopefully enough. The timelimit was passed down to Gurobi
 TimeLimit parameter. The time needed to generate the integer programming model
-from problem instance is not included in that time.
+from problem instance is not included in that time. The results show mean Gap
+found and the number of cars not in the terminal configuration at~$\tm$. The
+results are on~\autoref{tbl:compare}.
 
 \begin{table}[h]
     \begin{center}
@@ -47,8 +49,8 @@ from problem instance is not included in that time.
             marsi3a-1111 & 1h & 70 & 97.38 & 2 & 95.74 & 3\\
             marsi3a-2111 & 1h & 50 & 92.70 & 1 & 95.83 & 3\\
             marsi3b-1011 & 1h & 50 & 94.15 & 1 & 94.66 & 2\\
-            marsi3b-1111 & 1h & 50 & 74.64 & 0 & 92.92 & 1.6\\
-            marsi3b-2111 & 1h & 50 & 68.70 & 0 & 95.68 & 2.6\\
+            marsi3b-1111 & 1h & 50 & 74.64 & 0 & 92.92 & 1.66\\
+            marsi3b-2111 & 1h & 50 & 68.70 & 0 & 95.68 & 2.66\\
             marsi3c-1011 & 1.5h & 100 & 96.45 & 1 & 95.16 & 2\\
             marsi3c-1111 & 1.5h & 120 & 96.01 & 1 & 95.16 & 2\\
             marsi3c-2111 & 1h & 40 & 43.84 & 0 & 91.81 & 2\\
@@ -60,26 +62,53 @@ from problem instance is not included in that time.
             marsi3e-2111 & 2h & 150 & 97.02 & 1 & 95.17 & 3\\
             \hline
         \end{tabular}
-        \TODO{make this table nice}
-        \caption{Performance measurements of two models.}
+        \caption{Performance measurements of two models. The C column displays
+            the number of car that were not delivered to their destinations
+        by~$\tm$.}
         \label{tbl:compare}
     \end{center}
 \end{table}
 
-We first look at two problem instances.
+\subsection{Interpretation of results}
+It seems that AT model finds feasible solutions a lot more than TH model.
+However the Gap between incumbent solution and best bound seems to decrease
+better with TH model. One observation was that AT models 3 runs had very
+similar bounds. For TH model the 3 runs of the same problem instance had more
+variations.
+
+We also look at a few lines from the Gurobi log for both models.
+We start with marsi3c-2111 instance. Gurobi writes the following lines, when
+solving AT model.
+\begin{verbatim}
 Optimize a model with 248610 rows, 70110 columns and 765808 nonzeros
 Presolved: 47339 rows, 16854 columns, 199604 nonzeros
 Explored 3255 nodes (1267231 simplex iterations) in 3600.01 seconds
-
+\end{verbatim}
+The same line for TH model are:
+\begin{verbatim}
 Optimize a model with 711882 rows, 64944 columns and 3479938 nonzeros
 Presolved: 130560 rows, 38377 columns, 718910 nonzeros
 Explored 588 nodes (984243 simplex iterations) in 3600.10 seconds
+\end{verbatim}
+We can see, that AT model has more columns, but after pre-solving AT model has
+less than half of what is left in the TH model. We can also see that in AT
+model 3255 MIP nodes were explored, while the TH model only 588 were explored.
 
+The next problem instance is marsi3e-1111. For AT model gurobi generated the
+following lines:
+\begin{verbatim}
 Optimize a model with 1505623 rows, 406492 columns and 4599392 nonzeros
 Presolved: 539301 rows, 191201 columns, 2574442 nonzeros
 Explored 282 nodes (322789 simplex iterations) in 7200.32 seconds
-
+\end{verbatim}
+And the corresponding lines for TH are:
+\begin{verbatim}
 Optimize a model with 4351099 rows, 376141 columns and 21428351 nonzeros
 Presolved: 1042718 rows, 293077 columns, 5719680 nonzeros
 Explored 569 nodes (741744 simplex iterations) in 7207.95 seconds
+\end{verbatim}
+Here we see similar size comparisons between initial model sizes and model
+sizes after pre-solve. However, in this case it turn out that Gurobi has
+managed explore more nodes in the TH model, than in AT model. That might
+explain, why TH model has a better Gap in this problem instance.
 
