@@ -167,8 +167,9 @@ parking space and every edge $(u,v)$ means that there is no obstacle between
 parking spaces~$u$ and~$v$. The parking places can be at most 4-way-connected,
 with the connections corresponding to directions in $\D$.
 
-Every parking space has status. We let $K$ be the number of different labels we
-want to give to cars. All possible node statuses are described
+We let $K$ be the number of different labels we want to give to cars. We do not
+give robots labels, because for our simplification, they are indistinguishable.
+Every parking space has status. All possible node statuses are described
 in~\autoref{tbl:statuses}. We denote the set of all node statuses as~$\W$.
 
 \begin{table}
@@ -188,10 +189,10 @@ in~\autoref{tbl:statuses}. We denote the set of all node statuses as~$\W$.
             \hline
         \end{tabular}
         \TODO{make this table nice}
-        \caption{We all different possible statuses of parking spaces with
-            their descriptions. Note that $\stat{i} \in \{0,\ldots,K-1\}$. So
-            when there is a robot carrying car with label 2, the status should
-            be \stat{2r}, not \stat{ir}.}
+        \caption{We list all possible statuses of parking spaces with their
+            descriptions. Note that $\stat{i} \in \{0,\ldots,K-1\}$. So when
+            there is a robot carrying car with label 2, the status should be
+            \stat{2r}, not \stat{ir}.}
         \label{tbl:statuses}
     \end{center}
 \end{table}
@@ -234,3 +235,7 @@ see~\autoref{fig:unsolvable}.
         \label{fig:unsolvable}
     \end{center}
 \end{figure}
+
+\subsubsection{Oversimplified problem}
+From theoretical viewpoint, there is a interesting and relevant result
+in~\cite{calinescu2008reconfigurations}. For this tought experiment, we further simplify our problem, and also forget about robots and the times. 
