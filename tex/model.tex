@@ -26,7 +26,7 @@ arriving at and adjacent node. Since we change the node statuses only when we
 arrive at the center of parking place as illustrated
 on~\autoref{fig:movingstatus}, the decisions to continue or stop moving are
 also made on the same node. The object has not yet arrived at the other node,
-so it does not make sense tie to decision with the destination node.
+so it does not make sense to tie decision with the destination node.
 
 \begin{lemma}
     All feasible solutions to the integer programming model correspond to feasible
@@ -118,7 +118,6 @@ in~\autoref{tbl:decvars}.
         $w$ a robot starts to drop a car.\\
         \hline
     \end{tabular}
-    \TODO{make this table nice}
     \caption{The table explaining the meaning of decision variables.}
     \label{tbl:decvars}
 \end{table}
@@ -544,9 +543,10 @@ the model, disable the decision.
 \end{align}
 
 \subsubsection{Moving constraints}
-While constructing movement constraints, we needs some abbreviations.
-Therefore, the constraints in this section are for all combinations of $u \in
-\V$, $w \in \Wmc$, $d \in \D$ and $t \in \T$. \TODO{Fix this paragraph}
+While constructing movement constraints, we need some abbreviations and cannot
+write all the quantifiers before every constraint. Therefore, the constraints
+in this section are for all combinations of $u \in \V$, $w \in \Wmc$, $d \in
+\D$ and $t \in \T$. \TODO{Fix this paragraph}
 
 Now let $\td = \getMT(w,d)$, and $\td' = \td-1$. When movement starts at time $t$,
 the node status will change at time $t+\td$, and at time $t+\td'$ a decision
@@ -769,18 +769,22 @@ Next are the lift and drop variables that happened in the past.
 \end{align}
 Now there are the movement variables. Only continue and stop variables actually
 correspond to immediate node status changes.
-\todo{$w_m$ is wrong here}
 \begin{align}
     \A_{\mathrm{move}} &= \begin{cases}
-        \{\contOrStop_{u,w_m,d,t} \mid w_m \in \Wm \wedge \getMC(w_m) = w\} \IFc
-        (\edg(u,d),u) \in \E\\
-        \emptyset \IFco
-    \end{cases}\\
-    \B_{\mathrm{move}} &= \begin{cases}
-        \{\contOrStop_{v,w_m,d+2,t} \mid w_m \in \Wm \wedge \getMC(w_m) = w\} \IFc
-        (u,\edg(u,d)) \in \E\\
+        \{\contOrStop_{u,\getMC(w),d,t} \mid d \in \D \wedge (u,\edg(u,d)) \in \E\} \IFc
+         w \in \Wm\\
         \emptyset \IFco
     \end{cases}
+\end{align}
+We use $\B_{\mathrm{move}}$ to denote all the movements that could come
+into~$u$. The expression $\addMC(w,w_m) = \emptyset$ holds, when $w_m$ could
+not be added to $w$.
+\begin{align}
+    \begin{split}
+    \B_{\mathrm{move}} =
+    \{\contOrStop_{\edg(u,d),w_m,d+2,t} &\mid d \in \D,  w_m \in \Wm\\
+        &\wedge \addMC(w,w_m) \neq \emptyset \wedge  (\edg(u,d),u) \in \E\}
+    \end{split}
 \end{align}
 Now that we have defined all the subpart we join them together.
 \begin{align}

@@ -19,9 +19,7 @@ platform. For a driver the experience should be very similar to regular valet
 parking: driver stops near the door and does not need to worry about parking,
 after visiting the venue the driver can notify the system and will have their
 car brought back to them.
-\TODO{Write about a more concrete system.}
 \subsection{The problem}
-\TODO{Some pictures of actual robots?}
 In an automated valet parking system, the software has to choose which of
 possibly many parking robots will service the incoming parking or car retrieval
 request, it will also need to figure out a path for the robots. Regular car
@@ -237,5 +235,27 @@ see~\autoref{fig:unsolvable}.
 \end{figure}
 
 \subsubsection{Oversimplified problem}
+\todo{absolutely not sure about this section}
 From theoretical viewpoint, there is a interesting and relevant result
-in~\cite{calinescu2008reconfigurations}. For this tought experiment, we further simplify our problem, and also forget about robots and the times. 
+in~\cite{calinescu2008reconfigurations}. For this thought experiment, we further
+simplify our problem, and also forget about robots and the moving times. We
+just have a graph $\mathcal{G}$, initial configuration of cars, and terminal
+configuration of cars. Cars can move from one node~$u$ to another node~$v$ in
+an instant, the only constraint is that there must be path from $u$ to $v$,
+where all intermediate nodes are unoccupied by other cars. The problem is still
+to reconfigure the cars, so that terminal configuration is obtained with
+minimum number of moves. 
+
+Theorem 1 from~\cite{calinescu2008reconfigurations}, states that for every
+connected graph, for every initial and terminal configuration with $n$ cars,
+there exists a solution with at most $n$ moves and for trees there is a linear
+time algorithm for finding the optimal moves. However, that applies to only
+unlabeled cars.
+
+Maybe there are large firms, where everyone can just ride a random company car.
+But in general a user expects to receive their regular car. Therefore we still
+have to keep labels on cars. 
+
+According to theorem 3 from~\cite{calinescu2008reconfigurations}, with labeled
+cars on a graph, the reconfiguration problem is APX-hard. That means that there
+is no polynomial-time approximation scheme for the problem.
