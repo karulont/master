@@ -1,36 +1,47 @@
 \section{Comparison}
-There was an alternative integer programming model developed for exact same
-problem, using the same simplifications and assumptions described
-in~\autoref{sec:discrete problem}. The alternative model has a lots of more
-variables. With more variables it is possible use simpler constraints, which
-contain variables from non consecutive timesteps. To be more precise,
-constraints only use the variables from the current timestep $t$ and from the
-next timestep $t+1$.
+At the Algorithms and Theory research group in University of Tartu, another
+integer programming model was developed with the same problem in mind. The
+idea was that we come up with different models, and then can later compare
+them. We will denote the model described in this thesis as TH, and the other
+model as AT. The AT model used the same simplifications and assumptions described
+in~\autoref{sec:discrete problem}. The model has a more variables. With more
+variables it is possible use simpler constraints, which contain variables only
+from consecutive timesteps. To be more precise, constraints only use the
+variables from the current timestep $t$ and from the next timestep $t+1$. To
 
-The objective function for alternative model is a mix between progressive
+The objective function for the AT model is a mix between progressive
 energy minimization like~\eqref{eq:objective} and minimizing the time when node
-statuses different. I guess there could be some problems similar to the problem
+statuses different. We estimate that there could be some problems similar to the problem
 depicted in~\autoref{apx:movement}. Terminal state is fixed with a large cost,
 when it differs in the last timestep. The objective function only considers the
 location of cars and not the robots just like the model described
 in~\autoref{sec:model}.
 
-\subsection{Problem instances used for comparison}
-The underlying grid layout was taken from a real car park. Initial and terminal
-configurations were randomly generated.
-
 \subsection{Testing platform}
 The testing was done a machine with Intel(R) Core(TM) i7-4790K CPU.  The
 machine has 16GB of operating memory. With hyper-threading the number of
 virtual CPUs available was 8. However, the solvers were instructed to use only
-thread, because several instances were run in parallel.
+one thread, because several instances were run in parallel.
+
+\subsection{Problem instances used for comparison}
+The underlying grid layout was taken from a real car park. Initial and terminal
+configurations were randomly generated.
 
 \subsection{Results}
+Both models were run against Several problem instances. Each instance was run 3
+times by each model. Number of timesteps for each problem instance was made to
+be small, but hopefully enough. The timelimit was passed down to Gurobi
+TimeLimit parameter. The time needed to generate the integer programming model
+from problem instance is not included in that time.
+
 \begin{table}[h]
     \begin{center}
         \begin{tabular}{|c|c|c|c|c|c|c|}
+            \cline{4-7}
+            \multicolumn{3}{l}{\ } & \multicolumn{2}{|c|}{AT} &
+            \multicolumn{2}{|c|}{TH}\\
             \hline
-            Instance & tlimit & $\tm$ & Cap & C & Cap & C\\
+            Instance & tlimit & $\tm$ & Gap & C & Gap & C\\
             \hline
             marsi3a-1011 & 1h & 50 & 64.53 & 0 & 96.23 & 2\\
             marsi3a-1111 & 1h & 70 & 97.38 & 2 & 95.74 & 3\\
@@ -54,3 +65,21 @@ thread, because several instances were run in parallel.
         \label{tbl:compare}
     \end{center}
 \end{table}
+
+We first look at two problem instances.
+Optimize a model with 248610 rows, 70110 columns and 765808 nonzeros
+Presolved: 47339 rows, 16854 columns, 199604 nonzeros
+Explored 3255 nodes (1267231 simplex iterations) in 3600.01 seconds
+
+Optimize a model with 711882 rows, 64944 columns and 3479938 nonzeros
+Presolved: 130560 rows, 38377 columns, 718910 nonzeros
+Explored 588 nodes (984243 simplex iterations) in 3600.10 seconds
+
+Optimize a model with 1505623 rows, 406492 columns and 4599392 nonzeros
+Presolved: 539301 rows, 191201 columns, 2574442 nonzeros
+Explored 282 nodes (322789 simplex iterations) in 7200.32 seconds
+
+Optimize a model with 4351099 rows, 376141 columns and 21428351 nonzeros
+Presolved: 1042718 rows, 293077 columns, 5719680 nonzeros
+Explored 569 nodes (741744 simplex iterations) in 7207.95 seconds
+

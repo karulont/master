@@ -24,16 +24,23 @@ code that still uses version 2.X of Python, it should be explicitly
 mentioned that Python 3.X was used in thesis. To be precise, the exact version
 was Python 3.5.1.
 \subsection{PANDA}
-Programmers are used to thinking in terms of if clauses. However, in an integer
+Programmers are used to thinking in terms of if-clauses. However, in an integer
 programming model there are no ifs. At first it was hard to come up with
 constraints. You knew which variables are involved and what values are legal,
 but writing them as a constraint was still unintuitive. Finding the right
 constraint when there were five or more variables proved hard to do by
 hand. Fortunately there is a tool called PANDA~\cite{panda} to help with
 finding constraints.
-PANDA takes an input file, which list the variables and legal values of the
-variables. Then it processes this list of legal values and outputs equalities and inequalities
-that hold between the variables. As an example here is the contents of an valid input file.
+
+PANDA is short for Parallel AdjaceNcy Decomposition Algorithm and its internal
+algorithm is more or less the same as Fourier-Motzkin elimination algorithm,
+which is taught at the University of Tartu in the course MTAT.05.120
+``Combinatorial Optimization''.
+
+PANDA takes an input file, which list the variables and feasible values of the
+variables. Then it processes this list of feasible values and outputs a
+complete system of equalities and inequalities that hold between the variables.
+As an example here is the contents of an valid input file.
 \begin{verbatim}
 Names:
 occu incoming
@@ -52,13 +59,13 @@ occu -incoming <= 0
 occu <= 1
 \end{verbatim}
 
-Writing input files for PANDA is a little boring, because you have to list all
-the legal assignments of values to variables. We wrote little programs with
-regular if clauses to generate input files for PANDA. PANDA outputs lots of
+Writing input files for PANDA is a little tedious, because you have to list all
+the feasible assignments of values to variables. We wrote little programs with
+regular if-clauses to generate input files for PANDA. PANDA outputs lots of
 inequalities, but some of them are trivial and already covered by other
 constraints in the model. Therefore, human judgement was still needed to see
-which inequalities and equalities added something to the integer programming
-model.
+which inequalities and equalities added something valuable to the integer
+programming model.
 \subsection{Graphical visualization}
 For testing the model and seeing the solutions found, we needed some kind of
 feedback. At first we had a textual output of the node status and decision
@@ -106,15 +113,15 @@ on~\autoref{fig:gui}.
 In the development phase errors were made. Sometimes a feasible movement were
 not feasible in the integer programming model. This would mean that all the
 constraints would need to be carefully verified again. Luckily, Gurobi can
-calculate the irreducible inconsistent subsystem of an infeasible model.
+calculate an irreducible inconsistent subsystem of an infeasible model.
 Inconsistent subsystem of a integer program is a subset of constraints, that
-are inconsistent. Irreducible inconsistent subsystem is the minimal
+are inconsistent. Irreducible inconsistent subsystem is a minimal
 inconsistent subsystem. Basically we can ask Gurobi to find out which set of
 constraints make the model infeasible. After we get such a set, we only have
 recheck the constraints that are in the irreducible inconsistent subsystem.
 
-As an example here is the Irreducible inconsistent subsystem for the orthogonal
-collision illustration in~\autoref{sec:orthcoltest}.
+As an example here is the Irreducible inconsistent subsystem given by Gurobi
+for the orthogonal collision illustration in~\autoref{sec:orthcoltest}.
 \begin{verbatim}
 Minimize
  
@@ -169,4 +176,12 @@ tuning tool found was:
 \begin{itemize}
     \item AggFill = 5
 \end{itemize}
-\TODO{explain each found parameter}
+
+Now we briefly explain the settings. In the first case MIPFocus is used to
+controls the focus of MIP solver. Focus 2 means to work on the best bound.
+Presolve controls the aggressiveness of pre-solving the model. Value of 2 means
+that pre-solving is aggressive. PrePasses is used to limit the number of
+pre-solving passes. Cuts = 0 turns off all cut generations. AggFill controls
+the fill level in pre-solve aggregations, with larger values generally lead to
+more presolved rows and columns, but at the same time leave more non-zeros in
+the constraint matrix~\cite{gurobiparams}.
