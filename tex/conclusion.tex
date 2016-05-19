@@ -1,9 +1,17 @@
 \section{Conclusions}
+Integer programming model for optimizing a specific automated valet parking
+system was derived. The model was tested with different problem instances. Some
+instances revealed problems with the objective function used. Several slightly
+different objective functions were proposed and field tested on problem
+instances.
 
-Integer programming model for optimizing a specific automated valet parking systam was derived. The model was tested with different test cases, 
-for which it was able to find an optimal solution. 
+Different integer programming models that are used to solve a same problem are
+known to have wildly different running times that are hard to predict. The
+performance of the current model was lower then the comparison that it was
+benchmarked against. One plausible way to try to improve it would be to come up
+with a novel way how to encode various states and constraints needed to still
+represent the same automated valet parking problem.
 
-Different integer programming models that are used to solve a same problem are known to have wildly different running times that are hard to predict.
-The performance of the current model was lower then the comparison that it was benchmarked against. One plausible way to try to improve it would be to try to 
-limit the total number of variables in the model by combining them into single variable with a wider range for the solver. 
-This integer programming model could be used to validate future heuristical solvers for the same problem, for example any deep learning approaches.  
+To really solve the full automated valet parking problem, we need to deal with
+real-time requirements, which currently are infeasible for the integer
+programming models compared here. We believe that 
