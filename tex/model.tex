@@ -189,6 +189,7 @@ the head-on collision test.
 \end{align}
 As with other collision tests, the model should be infeasible.
 \subsubsection{Orthogonal collision}
+\label{sec:orthcoltest}
 We also have a test for collision with orthogonal directions.
 \testImage{collisionorth}{Initial node statuses for collision test with
 orthogonal directions}
@@ -845,6 +846,7 @@ status variables at the first timestep.
 Let $\termW{v}$ denote the end status of node $v$. There are different ways to make
 the model find a solution. One way is to add constraints for the last timestep.
 \begin{align}
+    \label{eq:termcont}
     &\forall v \in \V\colon &\nstat_{v,\termW{v},t_{\max}} = 1
 \end{align}
 We still have not defined the objective function to the model. We can
@@ -917,6 +919,10 @@ status is different from terminal state~$\termW{v}$. Let $g(t) = 1 +
 In the end we used objective function~\eqref{eq:objective} with a small
 modification to only give penalties to those node statuses, where the terminal
 status contains a labeled car.
+
+It should also be mentioned that the model performance varied greatly with
+different objective functions. And also on the fact, if terminal configuration
+is set with constraints or not.
 
 \subsection{Size of the model}
 It is customary to give the total number of variables, equalities and

@@ -169,7 +169,7 @@ with the connections corresponding to directions in $\D$.
 
 Every parking space has status. We let $K$ be the number of different labels we
 want to give to cars. All possible node statuses are described
-in~\autoref{tbl:statuses}. We denote the set of all node status as~$\W$.
+in~\autoref{tbl:statuses}. We denote the set of all node statuses as~$\W$.
 
 \begin{table}
     \begin{center}
@@ -218,9 +218,8 @@ see~\autoref{fig:movingstatus}.
 The problem is to find a suitable sequence of actions for robots, to
 reconfigure the given initial configuration into the terminal configuration.
 Both initial and terminal configurations are given by node statuses for every
-one.
+vertex.
 
-\TODO{Infeasible initial and terminal status, with example}
 Sometimes a given initial status with given terminal status is unsolvable no
 matter how many timesteps are considered. For a very simple example
 see~\autoref{fig:unsolvable}.
