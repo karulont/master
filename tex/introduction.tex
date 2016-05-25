@@ -9,36 +9,36 @@ parking. Valet parking is rare in Estonia, but it is quite common in North
 America. Valet parking means that the driver hand the car over to a valet and a
 valet will park and retrieve their car when requested.
 
-One way to further optimize the parking problem - save time and require less 
-parking space - is to use automated valet parking.
-Instead of a human valet, there is a parking robot that
-carries your car to a free parking space. In the system explored in this
-thesis, drivers will stop their cars on a special platform. A parking robot can
-freely move under those platforms and also can lift the platform up from the
-ground and carry it with the car. For a driver the experience should be very 
-similar to regular valet parking: driver stops near the door and does not need to worry about parking,
-after visiting the venue the driver can notify the system will bring the
-car back to them.
+One way to further optimize the parking problem - save time and require less
+parking space - is to use automated valet parking. Instead of a human valet,
+there is a parking robot that carries your car to a free parking space. In the
+system explored in this thesis, drivers will stop their cars on a special
+platform. A parking robot can freely move under those platforms and also can
+lift the platform up from the ground and carry it with the car. For a driver
+the experience should be very similar to regular valet parking: driver stops
+near the door and does not need to worry about parking, after visiting the
+venue the driver can notify the system, which will then bring the car back to
+them.
 \subsection{The problem}
 In an automated valet parking system, the software dictates which parking robot 
 will service the incoming parking or car retrieval request, it will also need 
 to do path-planning for the robots. 
 Regular car parks have passageways, so that no car is parked in a way that would block
 other cars from entering or exiting. In such automated system we can park cars
-more densly, because blocking cars can be lifted and moved out of the way.
+more densely, because blocking cars can be lifted and moved out of the way.
 It is important that the time taken to retrieve cars is minimized, otherwise
-drivers time is wasted waiting. In a car park without passageways, the parking 
+driver's time is wasted waiting. In a car park without passageways, the parking 
 robots have to be cooperative and cannot do path planning as independent agents 
 like in~\cite{wurman2008coordinating}. There are car parks with different layouts, 
 some have large areas connected by narrow corridors, which would break algorithms 
 that work on a rectangular grid. Algorithms specially designed for a park layout 
 or even car parks built to match the specifics of an algorithm are operational, 
-but they need lot of work and generally more expensive. We want to test if a 
+but they need a lot of work and are generally more expensive. We want to test if a 
 general purpose tool like integer programming can be used to optimize automated 
 valet parking operations.
 
-There are a lot of different optimization problems in a automated parking system
-described. We chose to tackle a sub-problem: given a initial configuration of
+There are a lot of different optimization problems in an automated parking system
+described. We chose to tackle a sub-problem: given an initial configuration of
 robots and cars in the system and a terminal configuration, find the best
 sequence of actions for robots to transform the initial configuration into the
 terminal configuration. Note that best in this case means mostly shortest time,
@@ -53,22 +53,23 @@ can give us a strong guarantee that the solution found is in fact optimal.
 The parking robot can move either forwards, backwards or sideways. The length of
 the parking space is 6 meters, and it is 3 meters wide. The robots have smaller
 dimensions. Every action takes some time. Lifting a car takes 9 seconds,
-lowering it will take 3 seconds. The speed of the robot is 2 meters per second,
+lowering it takes 3 seconds. The speed of the robot is 2 meters per second,
 when not carrying a car, and 1 meter per second, when loaded. Robots needs time
-to accelerate and de-accelerate. Changing the direction takes 3 seconds.
+to accelerate and decelerate. Changing the direction takes 3 seconds.
 
 The previous paragraph describes the estimated times which were to be used as
 basis for building the model. In the reality they might be different, but this
-is an idealized model, because the actual robots are not yet built after all.
+is an idealized model. After all, the actual robots are not yet built.
 
-It is perfectly valid to interpret the time required for stopping and reversing as acceleration. 
-It is said that changing direction takes 3 seconds. The interpretation we used, is
-that it takes 1.5 seconds to stop a robot moving at it's maximum speed. And
-another 1.5 seconds to accelerate it to maximum speed in another direction.
-Maximum speed and acceleration depends on whether the robot is carrying a car or not.
-Aaccording to Newton's Second Law, acceleration of robot can be greater when the mass is lower. Meaning that, in this case, a heavy loaded robot can
-accelerate at half the rate as unladen one. It might help to
-see~\autoref{fig:changedir}.
+It is perfectly valid to interpret the time required for stopping and reversing
+as acceleration. It is said that changing direction takes 3 seconds. The
+interpretation we used, is that it takes 1.5 seconds to stop a robot moving at
+its maximum speed. And another 1.5 seconds to accelerate it to maximum speed in
+another direction. Maximum speed and acceleration depends on whether the robot
+is carrying a car or not. According to Newton's Second Law, acceleration of
+robot can be greater when the mass is lower. Meaning that, in this case, a
+heavy loaded robot can accelerate at half the rate as unladen one. It might
+help to see~\autoref{fig:changedir}.
 
 \begin{figure}[h]
     \begin{center}
@@ -81,7 +82,7 @@ see~\autoref{fig:changedir}.
     \end{center}
 \end{figure}
 
-It is assumed that car park is a grid of of parking spaces. We define a set of
+It is assumed that car park is a grid of parking spaces. We define a set of
 directions as $\label{eq:dir}\D = \{\Dn, \De, \Ds, \Dw\}$. A parking place in the $\Dn$ -
 $\Ds$ dimension is 6 meters long, and in the $\De$ - $\Dw$ dimension is 3
 meters wide. Note that the directions defined here do not have to correspond to
@@ -104,24 +105,24 @@ dimensions of the parking space.
 \end{figure}
 
 When a robot decides to move many spaces in one direction the distance traveled
-is equal to the distances covered while accelerating, while de-accelerating and
-while moving with full speed. For an empty robot the distance traveled while
-accelerating and de-accelerating sums to 3 meters. For each additional parking
+is equal to the distances covered while: accelerating, decelerating and
+moving with full speed. For an empty robot the distance traveled while
+accelerating and decelerating sums to 3 meters. For each additional parking
 place traveled we need 1.5 seconds for $\De$ or $\Dw$ direction. For $\Dn$ or
 $\Ds$ direction we first need to add 1.5 seconds for the first space and 3
-seconds for each additional parking space. For an loaded robot the distance traveled
-while accelerating and de-accelerating sums to 1.5 meters. For the shorter
-dimension of the parking space, we need additional 1.5 seconds, to reach a full 3
-meters. For additional spaces, we need to add 3 seconds for each additional
-space traveled. For the longer dimension, we need additional 4.5 seconds, and
-for each additional space we need to add 6 seconds to reach the desired
-distance.
+seconds for each additional parking space. For a loaded robot the distance
+traveled while accelerating and decelerating sums to 1.5 meters. For the
+shorter dimension of the parking space, we need additional 1.5 seconds, to
+reach a full 3 meters. For additional spaces, we need to add 3 seconds for each
+additional space traveled. For the longer dimension, we need additional 4.5
+seconds, and for each additional space we need to add 6 seconds to reach the
+desired distance.
 
 As an example, let us consider that a loaded robot wants to move 3
 parking spaces in the direction $\Dn$. The total distance needed to cover is
-$3\times 6 = 18$ meters. The time it takes is $3 + 4.5 + 2 \times 6 = 19.5s$
+$3\times 6 = 18$ meters. It takes $3 + 4.5 + 2 \times 6 = 19.5$
 seconds. Lets verify that the distance is right: for 3 seconds we are
-accelerating and de-accelerating, with top speed 1 $\frac{m}{s}$, the average
+accelerating and decelerating, with top speed 1 $\frac{m}{s}$, the average
 speed being 0.5 $\frac{m}{s}$. Other time we are moving with top speed which is 1
 $\frac{m}{s}$. The distance traveled will be $3 * 0.5 + 4.5 \times 1 + 2(6
 \times 1) = 18$ meters. An additional example is shown
@@ -146,7 +147,7 @@ on~\autoref{fig:manyspaces}.
             Lift car & 9\\
             Drop car & 3\\
             Accelerate to full speed & 1.5\\
-            Deacceleration from full speed to stop & 1.5\\
+            Decelerate from full speed to stop & 1.5\\
             Loaded robot moving to adjacent space (N or S) & 7.5\\
             Loaded robot moving to adjacent space (E or W) & 4.5\\
             Empty robot moving to adjacent space (N or S) & 3\\
@@ -193,7 +194,7 @@ see~\autoref{fig:unsolvable}.
 \end{figure}
 
 \subsubsection{Possible further simplifications}
-From theoretical viewpoint, there is a interesting and relevant result
+From theoretical viewpoint, there is an interesting and relevant result
 in~\cite{calinescu2008reconfigurations}. For this abstraction, we further
 simplify our problem, and also forget about robots and the moving times. We
 just have a graph $\mathcal{G}$, initial configuration of cars, and terminal

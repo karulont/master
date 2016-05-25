@@ -28,7 +28,7 @@ The underlying grid layout was taken from a real car park. Initial and terminal
 configurations were randomly generated.
 
 \subsection{Results}
-Both models were run against Several problem instances. Each instance was run 3
+Both models were run against several problem instances. Each instance was run 3
 times by each model. Number of timesteps for each problem instance was made to
 be small, but hopefully enough. The timelimit was passed down to Gurobi
 TimeLimit parameter. The time needed to generate the integer programming model
@@ -72,8 +72,8 @@ results are on~\autoref{tbl:compare}.
 \subsection{Interpretation of results}
 It seems that AT model finds feasible solutions a lot more than TH model.
 However the Gap between incumbent solution and best bound seems to decrease
-better with TH model. One observation was that AT models 3 runs had very
-similar bounds. For TH model the 3 runs of the same problem instance had more
+better with TH model. One observation was that AT model's 3 runs had very
+similar bounds. For TH model, the 3 runs of the same problem instance had more
 variations.
 
 We also look at a few lines from the Gurobi log for both models.
@@ -84,7 +84,7 @@ Optimize a model with 248610 rows, 70110 columns and 765808 nonzeros
 Presolved: 47339 rows, 16854 columns, 199604 nonzeros
 Explored 3255 nodes (1267231 simplex iterations) in 3600.01 seconds
 \end{verbatim}
-The same line for TH model are:
+The same lines for TH model are:
 \begin{verbatim}
 Optimize a model with 711882 rows, 64944 columns and 3479938 nonzeros
 Presolved: 130560 rows, 38377 columns, 718910 nonzeros
@@ -93,8 +93,10 @@ Explored 588 nodes (984243 simplex iterations) in 3600.10 seconds
 We can see, that AT model has more columns, but after pre-solving AT model has
 less than half of what is left in the TH model. We can also see that in AT
 model 3255 MIP nodes were explored, while the TH model only 588 were explored.
+From here we can conclude that AT model with easier constraints is better
+handled by Gurobi pre-solver.
 
-The next problem instance is marsi3e-1111. For AT model gurobi generated the
+The next problem instance is marsi3e-1111. For AT model Gurobi generated the
 following lines:
 \begin{verbatim}
 Optimize a model with 1505623 rows, 406492 columns and 4599392 nonzeros
@@ -109,6 +111,5 @@ Explored 569 nodes (741744 simplex iterations) in 7207.95 seconds
 \end{verbatim}
 Here we see similar size comparisons between initial model sizes and model
 sizes after pre-solve. However, in this case it turn out that Gurobi has
-managed explore more nodes in the TH model, than in AT model. That might
-explain, why TH model has a better Gap in this problem instance.
-
+managed to explore more nodes in the TH model, than in AT model. That might
+explain, why TH model has a better Gap in this problem instance. 

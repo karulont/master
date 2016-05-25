@@ -13,7 +13,7 @@ as~$\W$.
             Status & Meaning \\
             \hline
             \stat{e} & Parking space is empty.\\
-            \stat{r} & There is robot on the parking space.\\
+            \stat{r} & There is a robot on the parking space.\\
             \stat{i} & There is a car with label $i$ in
             the parking space.\\
             \stat{ri} & There is a car with label $i$ and a robot is under it.\\
@@ -30,7 +30,7 @@ as~$\W$.
     \end{center}
 \end{table}
 
-When a object moves from node~$u$ to an adjacent node $v$, the initial node
+When an object moves from node~$u$ to an adjacent node $v$, the initial node
 status remains the same for the whole duration of the movement. Meaning that
 even though the moving object partly blocks both~$u$ and~$v$, the node statuses
 for~$u$ and ~$v$ will still be the old ones, until the moving object reaches the center
@@ -66,7 +66,7 @@ robot carrying a car can move.
     \Wmc &= \Wd \cup \{\stat{r}\}
 \end{align}
 
-De-accelerating a moving robot takes 1 timestep. Therefore, the decision to continue
+Decelerating a moving robot takes 1 timestep. Therefore, the decision to continue
 moving in the same direction or to stop has to be made 1 timestep before
 arriving at an adjacent node. Since we change the node statuses only when we
 arrive at the center of parking place as illustrated
@@ -156,7 +156,7 @@ in~\autoref{tbl:decvars}.
         $d$, does not slow down and continues moving in direction $d$.\\ \hline
         $\stp_{v,w,d,t}$ & At timestep $t$ on parking space $v$ with node status
         $w$ a robot that is about to reach the neighbouring node in direction
-        $d$, starts to de-accelerate to stop in the neighbouring node.\\ \hline
+        $d$, starts to decelerate to stop in the neighbouring node.\\ \hline
         $\lift_{v,w,t}$ & At timestep $t$ on parking space $v$ with node status
         $w$ a robot starts to lift a car.\\ \hline
         $\drop_{v,w,t}$ & At timestep $t$ on parking space $v$ with node status
@@ -186,9 +186,9 @@ Also there were some occurrences, where we made wrong assumptions, because there
 are so many cases to consider for a simple action.
 
 Some of these illustrations or tests are meant to be infeasible. Others have
-expected outcomes, which are automatically verified . When an specific
+expected outcomes, which are automatically verified. When a specific
 objective function is not mentioned, the objective function will be left empty
-for that test. By empty objective we means that the objective function is~$\min
+for that test. By empty objective we mean that the objective function is~$\min
 0$.
 
 The initial node statuses are fixed for every configuration. To easily display
@@ -282,7 +282,7 @@ side, for explanation see~\autoref{fig:simumove}.
         \input{fig/simumove}
         \caption{Green rectangles are robots and gray rectangles are parking
             spaces. Both robots are moving in the same direction without a
-            collision as long as the left robot is not moving faster then the right
+            collision as long as the left robot is not moving faster than the right
         one.}
         \label{fig:simumove}
     \end{center}
@@ -304,8 +304,8 @@ checks, which should hold for all feasible solutions.
 
 \subsubsection{Simultaneous movement II}
 This is quite similar to last test, but now we have other than empty nodes in
-the way and one of the robots is also carrying a car. All the robots are forced
-to start moving to $\Dw$ by following constraints.
+the way and one of the robots is also carrying a car. The following constraints
+force all the robots to start moving to $\Dw$.
 \testImage{movetogetherdiff}{Initial node statuses for simultaneous movement
     test with a car on the way and the last robot carrying a car.}
 \begin{align}
@@ -710,7 +710,7 @@ as a reminder it was defined as $\contOrStop_{u,w,d,t} = \cont_{u,w,d,t} +
     \end{cases}
 \end{align}
 Now we can give the general constraint, which says something about $u$ status
-at the end of movement. When $w$ moves away from $u$, it's status should be the
+at the end of movement. When $w$ moves away from $u$, its status should be the
 beginning status minus the $w$, or something else must have come into $u$. To
 get the beginning status without $w$ we can use the helper function $\remMC$,
 which removes a moving component from node status.
@@ -940,7 +940,7 @@ to every labeled car. This would give optimal solutions energy-wise,
 but we are more concerned about time.
 
 Therefore, a combination of both~\eqref{eq:energyobj} and \eqref{eq:timeobj}
-might be the better. After testing such a combination, it turned out that the
+might be better. After testing such a combination, it turned out that the
 problem of robot moving to destination before doing any work was still the
 case, however it removed the problem of robots doing unnecessary
 actions instead of waiting.

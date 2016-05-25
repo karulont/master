@@ -15,7 +15,7 @@ However, they are also both commercial like Gurobi and Gurobi was to easiest to
 get an academic licence for.
 
 Gurobi has bindings for several languages. The ones considered were C++ and
-Python. It is well known that Python as a interpreted language has a constant
+Python. It is well known that Python as an interpreted language has a constant
 runtime overhead. However, C++ has lots of unwanted complexity. The author
 chose to use Python, because generating the integer programming model would
 only take a fraction of the time to actually solve it. And the model solving
@@ -26,7 +26,7 @@ was Python 3.5.1.
 \subsection{PANDA}
 Programmers are used to thinking in terms of if-clauses. However, in an integer
 programming model there are no ifs. At first it was hard to come up with
-constraints. You knew which variables are involved and what values are legal,
+constraints. We knew which variables were involved and what values were legal,
 but writing them as a constraint was still unintuitive. Finding the right
 constraint when there were five or more variables proved hard to do by
 hand. Fortunately there is a tool called PANDA~\cite{panda} to help with
@@ -94,7 +94,7 @@ underlying graph of the problem one timestep at a time. There are keybindings
 to increase and decrease the visible timestep. For a given timestep, the
 occupied edges are highlighted. At each vertex, the node status is displayed
 and if one of the decision variables was set to 1, the decision is also displayed
-inside the vertex. An screenshot of the visualization graphical interface is
+inside the vertex. A screenshot of the visualization graphical interface is
 on~\autoref{fig:gui}.
 
 \begin{figure}[h]
@@ -114,13 +114,13 @@ In the development phase errors were made. Sometimes a feasible movement were
 not feasible in the integer programming model. This would mean that all the
 constraints would need to be carefully verified again. Luckily, Gurobi can
 calculate an irreducible inconsistent subsystem of an infeasible model.
-Inconsistent subsystem of a integer program is a subset of constraints, that
+Inconsistent subsystem of an integer program is a subset of constraints, that
 are inconsistent. Irreducible inconsistent subsystem is a minimal
 inconsistent subsystem. Basically we can ask Gurobi to find out which set of
-constraints make the model infeasible. After we get such a set, we only have
+constraints make the model infeasible. After we get such a set, we only have to
 recheck the constraints that are in the irreducible inconsistent subsystem.
 
-As an example here is the Irreducible inconsistent subsystem given by Gurobi
+As an example here is the irreducible inconsistent subsystem given by Gurobi
 for the orthogonal collision illustration in~\autoref{sec:orthcoltest}.
 \begin{verbatim}
 Minimize
